@@ -1,5 +1,4 @@
-<!-- test -->
-line2<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -23,8 +22,9 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <aside class="side">
 <h1>📅 작품 마감 캘린더</h1>
 <button class="btn" onclick="openModal()">＋ 작품 추가</button>
+<button class="btn" id="dlBtn" onclick="downloadFile()" style="display:none;margin-top:8px" title="다른 사람에게 줄 수 있는 빈 캘린더 파일을 받습니다">⬇ 파일 다운로드</button>
 <div class="section"><h3>작품</h3><div id="works"></div></div>
-<div class="legend">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br>"날짜 메모 보기"를 켜면 날짜 숫자를 클릭해 그날 메모를 남길 수 있습니다. 끄면 메모는 저장된 채로 화면에서만 숨겨집니다.</div>
+<div class="legend">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>⬇ 파일 다운로드: 다른 사람에게 줄 수 있는 빈 캘린더 파일(내 데이터는 포함되지 않음)을 받습니다.<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br>"날짜 메모 보기"를 켜면 날짜 숫자를 클릭해 그날 메모를 남길 수 있습니다. 끄면 메모는 저장된 채로 화면에서만 숨겨집니다.</div>
 </aside>
 <main class="main">
 <div class="top">
@@ -556,6 +556,8 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "145822699450",
   appId: "1:145822699450:web:9f1337410d948d51aa9783"
 };
+const LOCAL_ONLY = false; // 다운로드한 파일 버전에서는 true (로그인 없이 이 컴퓨터에만 저장)
+const ONLINE_URL = 'https://yuhyojin-afk.github.io/webtoon-pd-calendar/';
 
 const CFG_KEY='workCalendarFirebaseCfgV1';
 const FB_VER='10.12.2';
@@ -625,6 +627,7 @@ function cloudPush(){
 function setSync(st,msg){syncState=st;renderSync(msg);}
 function renderSync(msg){
  const el=document.getElementById('syncArea'); if(!el) return;
+ if(LOCAL_ONLY){el.innerHTML=`<span title="이 파일은 로그인 없이 이 컴퓨터 브라우저에만 저장됩니다">💾 이 컴퓨터에만 저장</span><a class="syncBtn" style="text-decoration:none;color:#1967d2" href="${ONLINE_URL}" target="_blank" rel="noopener">☁ 온라인 버전(구글 동기화)</a>`;return;}
  const cfg=getCfg();
  if(!cfg){el.innerHTML=`<button class="syncBtn" onclick="openCfg()">☁ 동기화 설정</button>`;return;}
  if(syncState==='loading'){el.innerHTML='☁ 연결 중…';return;}
@@ -637,7 +640,27 @@ function renderSync(msg){
 
 function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(new Error('스크립트 로드 실패: '+src));document.head.appendChild(s);});}
 
+// 다른 사람에게 배포용: 데이터는 빼고 '로그인 없이 쓰는' 빈 캘린더 파일을 만들어 다운로드
+async function downloadFile(){
+ const btn=document.getElementById('dlBtn');
+ try{
+  btn.disabled=true;btn.textContent='준비 중…';
+  const res=await fetch(location.href.split('#')[0],{cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  let src=await res.text();
+  const re=/const FIREBASE_CONFIG = [\s\S]*?const LOCAL_ONLY = false;/;
+  if(!re.test(src)) throw new Error('파일 형식을 인식하지 못했어요');
+  src=src.replace(re,'const FIREBASE_CONFIG = null;\nconst LOCAL_ONLY = true;');
+  const url=URL.createObjectURL(new Blob([src],{type:'text/html;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download='webtoon-pd-calendar.html';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+ }catch(e){console.error(e);alert('다운로드에 실패했어요: '+e.message);}
+ finally{btn.disabled=false;btn.textContent='⬇ 파일 다운로드';}
+}
 async function initCloud(){
+ if(!LOCAL_ONLY && location.protocol!=='file:') document.getElementById('dlBtn').style.display='';
+ if(LOCAL_ONLY){renderSync();return;}
  const cfg=getCfg();
  if(!cfg){renderSync();return;}
  if(location.protocol==='file:'){setSync('nofile');return;}
