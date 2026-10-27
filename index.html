@@ -1,0 +1,701 @@
+<!-- test -->
+line2<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>작품 마감 캘린더</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;color:#202124;background:#fff}
+.app{display:flex;height:100vh;min-width:1000px}.side{width:280px;border-right:1px solid #dadce0;padding:22px 18px;background:#fafafa}
+h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;border-radius:22px;padding:10px 17px;cursor:pointer;font-weight:600}.btn:hover{background:#f1f3f4}
+.section{margin-top:25px}.section h3{font-size:13px;color:#5f6368;margin:0 0 10px}.work{display:flex;align-items:center;gap:8px;padding:7px 4px;border-radius:7px}.work:hover{background:#eee}.dot{width:10px;height:10px;border-radius:50%;flex:none}.work label{flex:1;font-size:14px;cursor:pointer}.work-actions{display:flex;gap:2px}.mini{border:0;background:transparent;color:#777;cursor:pointer;font-size:13px;border-radius:5px;padding:3px 5px}.mini:hover{background:#e8eaed}.del{border:0;background:transparent;color:#777;cursor:pointer;font-size:16px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}.content{flex:1;display:flex;min-height:0}.calendarWrap{flex:1;min-width:0;display:flex;flex-direction:column}.notes{width:245px;border-left:1px solid #dadce0;background:#fafafa;padding:14px;overflow:auto}.noteCard{background:#fff;border:1px solid #dadce0;border-radius:8px;margin-bottom:10px;padding:10px}.noteTitle{font-size:13px;font-weight:600;margin-bottom:7px}.noteCard textarea{width:100%;height:72px;resize:vertical;border:1px solid #dadce0;border-radius:5px;padding:7px;font:12px Arial,"Noto Sans KR",sans-serif}.done{accent-color:#1a73e8}.top{height:68px;border-bottom:1px solid #dadce0;display:flex;align-items:center;padding:0 20px;gap:12px}.top .title{font-size:21px;font-weight:600;min-width:210px}.nav{display:flex;gap:4px}.nav button{border:0;background:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px}.nav button:hover{background:#f1f3f4}.today{border:1px solid #dadce0;background:#fff;border-radius:5px;padding:8px 13px;cursor:pointer}.toggle{border:1px solid #dadce0;background:#fff;border-radius:18px;padding:8px 13px;cursor:pointer}.toggle.active{background:#e8f0fe;color:#1967d2;border-color:#aecbfa}.grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:38px repeat(6,1fr);min-height:0}.dow{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;text-align:center;padding:10px;font-size:12px;color:#5f6368}.cell{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;padding:5px;overflow:auto}.cell.dragover{background:#e8f0fe}.event.dragging{opacity:.4}.event[draggable="true"]{cursor:grab}.num{font-size:12px;color:#5f6368;margin:2px 4px 5px}.num.today{background:#1a73e8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;padding:5px 0;margin:0 0 4px 2px}.event{font-size:11px;border-radius:4px;padding:4px 6px;margin:2px 0;line-height:1.25;color:#202124;white-space:nowrap;overflow:hidden}.event .small{font-size:10px;color:#555}.empty{background:#f8f9fa}.legend{font-size:11px;color:#666;margin-top:12px;line-height:1.5}
+.dateHint{font-size:13px;color:#5f6368;margin-bottom:14px;line-height:1.6}.dateHint b{color:#202124}.checkRow{display:flex;align-items:flex-start;gap:8px;margin:14px 0;padding:10px;background:#f8f9fa;border-radius:8px}.checkRow input{margin-top:3px}.checkRow .ct{font-size:13px;line-height:1.5}.checkRow .ct small{color:#5f6368;display:block;margin-top:2px}
+.authorBox{margin-top:16px;padding:12px;border:1px solid #f4c7a1;background:#fff8f1;border-radius:10px}.authorBox h4{margin:0;font-size:14px;color:#b45309}.authorBox .field label{color:#8a5a2b}.authorHead{display:flex;align-items:center;gap:8px}.authorHead input{width:auto}.event.author{background:#fff!important;border:1.5px dashed #e8710a}
+.chRow{display:flex;gap:6px;align-items:center;margin:4px 0;font-size:13px}.chRow input{width:70px!important;padding:7px!important}
+.syncBtn{border:1px solid #dadce0;background:#fff;border-radius:18px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:600}.syncBtn:hover{background:#f1f3f4}.syncDot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.28);align-items:center;justify-content:center}.modal.show{display:flex}.box{background:#fff;border-radius:12px;width:420px;max-height:92vh;overflow:auto;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,.18)}.box h2{font-size:18px;margin:0 0 18px}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#5f6368;margin-bottom:5px}.field input,.field select{width:100%;padding:10px;border:1px solid #dadce0;border-radius:6px;font-size:14px}.field input[type=color]{width:56px;height:38px;padding:3px;cursor:pointer}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.primary{background:#1a73e8;color:#fff;border-color:#1a73e8}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+<h1>📅 작품 마감 캘린더</h1>
+<button class="btn" onclick="openModal()">＋ 작품 추가</button>
+<div class="section"><h3>작품</h3><div id="works"></div></div>
+<div class="legend">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br>"날짜 메모 보기"를 켜면 날짜 숫자를 클릭해 그날 메모를 남길 수 있습니다. 끄면 메모는 저장된 채로 화면에서만 숨겨집니다.</div>
+</aside>
+<main class="main">
+<div class="top">
+<div class="title" id="monthTitle"></div>
+<button class="today" onclick="goToday()">오늘</button>
+<button class="toggle" id="releaseToggle" onclick="toggleRelease()">연재일 보기</button>
+<button class="toggle active" id="authorToggle" onclick="toggleAuthor()">작가 마감 숨기기</button>
+<button class="toggle" id="dateNoteToggle" onclick="toggleDateNotes()">날짜 메모 보기</button>
+<span id="viewMode" style="font-size:12px;color:#5f6368">현재: 마감일만 표시</span>
+<span id="syncArea" style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:#5f6368"></span>
+<div class="nav"><button onclick="moveMonth(-1)">‹</button><button onclick="moveMonth(1)">›</button></div>
+</div>
+<div class="content"><div class="calendarWrap"><div class="grid" id="calendar"></div></div><aside class="notes"><div style="font-size:12px;color:#5f6368;margin-bottom:10px;font-weight:600">작품별 마감 메모</div><div id="notes"></div></aside></div>
+</main>
+</div>
+
+<div class="modal" id="modal">
+<div class="box">
+<h2 id="modalTitle">작품 추가</h2>
+<div class="field"><label>작품명</label><input id="name" placeholder="예: 작품 A"></div>
+<div class="field"><label>연재 시작일 <span style="color:#777">(이 날짜 이후 첫 연재 요일부터 시작)</span></label><input id="start" type="date" onchange="updatePreview()" oninput="updatePreview()"></div>
+<div class="field"><label>시작 회차</label><input id="episode" type="number" min="1" value="1" placeholder="예: 1"></div><div class="field"><label>완결 회차 <span style="color:#777">(완결작이 아니면 비워두세요)</span></label><input id="finalEpisode" type="number" min="1" placeholder="예: 50"></div>
+<div class="field"><label>연재 요일</label><select id="weekday" onchange="updatePreview()"><option value="0">일요일</option><option value="1">월요일</option><option value="2">화요일</option><option value="3">수요일</option><option value="4">목요일</option><option value="5">금요일</option><option value="6">토요일</option></select></div>
+<div class="field"><label>마감 기준</label><select id="deadline" onchange="updatePreview()"><option value="same">연재일에 마감</option><option value="prev1">연재 1일 전 마감</option><option value="prev2">연재 2일 전 마감</option><option value="prev3">연재 3일 전 마감</option></select></div>
+<div class="dateHint" id="schedulePreview" style="margin:-4px 0 8px;padding:8px 10px;background:#f8f9fa;border-radius:6px;font-size:12px"></div>
+<div class="field"><label>연재 주기</label>
+<div style="display:flex;gap:8px;align-items:center">
+<input id="cycle" type="number" min="1" value="4" style="width:90px"> <span>주 연재 +</span>
+<input id="breakWeeks" type="number" min="0" value="1" style="width:90px"> <span>주 휴재</span>
+</div></div>
+<div class="authorBox">
+ <div class="authorHead"><input id="aEnabled" type="checkbox" onchange="toggleAuthorFields()"><label for="aEnabled"><h4>✍ 작가님 최종고 마감 일정</h4></label></div>
+ <div id="authorFields" style="display:none">
+  <div class="field"><label>작가 첫 마감일 <span style="color:#999">(이 날짜가 시작 회차의 마감일)</span></label><input id="aStart" type="date" onchange="updateAuthorPreview()" oninput="updateAuthorPreview()"></div>
+  <div class="field"><label>시작 회차</label><input id="aEpisode" type="number" min="1" value="1" oninput="updateAuthorPreview()"></div>
+  <div class="field"><label>마감 주기 <span style="color:#999">(1~20 숫자 입력 · 며칠마다 최종고 마감인지)</span></label>
+   <div style="display:flex;gap:8px;align-items:center">
+    <input id="aInterval" type="number" min="1" max="20" value="7" style="width:90px" oninput="updateAuthorPreview()"> <span>일마다 마감</span>
+   </div></div>
+  <div class="field"><label>중간 주기 변경 <span style="color:#999">(해당 회차부터 이후 계속 적용)</span></label>
+   <div id="aChanges"></div>
+   <button type="button" class="btn" style="padding:6px 12px;font-size:12px;margin-top:4px" onclick="addChangeRow()">＋ 주기 변경 추가</button>
+  </div>
+  <div class="dateHint" id="authorPreview" style="margin:0;padding:8px 10px;background:#fff;border-radius:6px;font-size:12px"></div>
+ </div>
+</div>
+<div class="field"><label>색상</label><input id="color" type="color" value="#d2e3fc"></div>
+<input id="editId" type="hidden"><div class="actions"><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" id="saveWorkBtn" onclick="saveWork()">추가</button></div>
+</div></div>
+
+<div class="modal" id="moveModal">
+<div class="box">
+<h2 id="moveModalTitle">마감일 변경</h2>
+<div class="dateHint" id="moveModalHint"></div>
+<div class="field"><label>새 마감일</label><input id="moveDate" type="date"></div>
+<div class="checkRow">
+ <input id="cascadeCheck" type="checkbox" checked>
+ <label for="cascadeCheck" class="ct">이 회차부터 이후 모든 회차 일정도 함께 밀기
+  <small>작가 사정 등으로 이 회차부터 일정이 통째로 며칠 밀렸을 때 사용하세요. 이후 회차들도 같은 간격만큼 자동으로 밀립니다. 체크 해제하면 이 회차만 바뀝니다.</small>
+ </label>
+</div>
+<div class="actions"><button class="btn" onclick="closeMoveModal()">취소</button><button class="btn primary" onclick="confirmMove()">적용</button></div>
+</div></div>
+
+<div class="modal" id="dateNoteModal">
+<div class="box">
+<h2 id="dateNoteModalTitle">날짜 메모</h2>
+<div class="field"><label>메모</label><textarea id="dateNoteText" rows="5" style="width:100%;padding:10px;border:1px solid #dadce0;border-radius:6px;font-size:14px;resize:vertical;font-family:inherit"></textarea></div>
+<div class="actions"><button class="btn" onclick="closeDateNoteModal()">취소</button><button class="btn" id="dateNoteDelBtn" onclick="deleteDateNote()" style="color:#c5221f">삭제</button><button class="btn primary" onclick="saveDateNote()">저장</button></div>
+</div></div>
+
+<div class="modal" id="cfgModal">
+<div class="box" style="width:480px">
+<h2>☁ 구글 로그인 동기화 설정</h2>
+<div class="dateHint">Firebase 콘솔 → 프로젝트 설정 → 내 앱(웹)에 있는 <b>firebaseConfig</b> 내용을 그대로 붙여넣으세요. <code>const firebaseConfig = { ... };</code> 전체를 붙여넣어도 됩니다.</div>
+<div class="field"><textarea id="cfgText" rows="9" style="width:100%;padding:10px;border:1px solid #dadce0;border-radius:6px;font:12px monospace;resize:vertical" placeholder="{ apiKey: &quot;...&quot;, authDomain: &quot;...&quot;, projectId: &quot;...&quot;, ... }"></textarea></div>
+<div class="actions"><button class="btn" onclick="closeCfg()">취소</button><button class="btn" id="cfgClearBtn" onclick="clearCfg()" style="color:#c5221f">설정 지우기</button><button class="btn primary" onclick="saveCfg()">저장</button></div>
+</div></div>
+
+<script>
+const KEY='workCalendarV1';
+function clamp(v,min,max,def){v=parseInt(v,10);if(isNaN(v))v=def;return Math.min(max,Math.max(min,v));}
+function normAuthor(a){
+ if(!a)return {enabled:false,start:'',episode:1,interval:7,changes:[],shifts:[]};
+ return {enabled:!!a.enabled,start:a.start||'',episode:+a.episode||1,interval:clamp(a.interval,1,20,7),changes:Array.isArray(a.changes)?a.changes:[],shifts:Array.isArray(a.shifts)?a.shifts:[]};
+}
+function normWork(w){return {...w,breakWeeks:(w.breakWeeks===0?0:Math.max(1,+w.breakWeeks||1)),shifts:Array.isArray(w.shifts)?w.shifts:[],author:normAuthor(w.author)};}
+let works=JSON.parse(localStorage.getItem(KEY)||'[]').map(normWork);
+let view=new Date(); view.setDate(1);
+
+function save(){localStorage.setItem(KEY,JSON.stringify(works));if(window.cloudPush)cloudPush();}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+function getFormData(){
+ const name=document.getElementById('name').value.trim();
+ const start=document.getElementById('start').value;
+ const episode=+document.getElementById('episode').value||1;
+ const finalRaw=document.getElementById('finalEpisode').value.trim();
+ const finalEpisode=finalRaw?Math.max(episode,+finalRaw):null;
+ const weekday=+document.getElementById('weekday').value;
+ const deadline=document.getElementById('deadline').value;
+ const cycle=Math.max(1,+document.getElementById('cycle').value||1);
+ const breakWeeks=Math.max(0,+document.getElementById('breakWeeks').value||0);
+ const color=document.getElementById('color').value;
+ const author={
+  enabled:document.getElementById('aEnabled').checked,
+  start:document.getElementById('aStart').value,
+  episode:+document.getElementById('aEpisode').value||1,
+  interval:clamp(document.getElementById('aInterval').value,1,20,7),
+  changes:readChanges()
+ };
+ return {name,start,episode,finalEpisode,weekday,deadline,cycle,breakWeeks,color,author};
+}
+function openModal(work=null){
+ document.getElementById('modal').classList.add('show');
+ document.getElementById('editId').value=work?work.id:'';
+ document.getElementById('modalTitle').textContent=work?'작품 설정 수정':'작품 추가';
+ document.getElementById('saveWorkBtn').textContent=work?'저장':'추가';
+ document.getElementById('name').value=work?.name||'';
+ document.getElementById('start').value=work?.start||'';
+ document.getElementById('episode').value=work?.episode||1;
+ document.getElementById('finalEpisode').value=work?.finalEpisode||'';
+ document.getElementById('weekday').value=work?.weekday??new Date().getDay();
+ document.getElementById('deadline').value=work?.deadline||'prev1';
+ document.getElementById('cycle').value=work?.cycle||4;
+ document.getElementById('breakWeeks').value=work?.breakWeeks??1;
+ document.getElementById('color').value=work?.color||'#d2e3fc';
+ // valueAsDate는 UTC 기준이라 한국 시간 새벽~오전 9시에 하루 전 날짜가 들어가는 문제가 있어 로컬 날짜로 직접 지정
+ if(!work) document.getElementById('start').value=key(new Date());
+ const a=normAuthor(work?.author);
+ document.getElementById('aEnabled').checked=a.enabled;
+ document.getElementById('aStart').value=a.start||document.getElementById('start').value;
+ document.getElementById('aEpisode').value=a.enabled?a.episode:(work?.episode||1);
+ document.getElementById('aInterval').value=a.interval;
+ document.getElementById('aChanges').innerHTML='';
+ a.changes.forEach(c=>addChangeRow(c.ep,c.interval,true));
+ toggleAuthorFields();
+ updatePreview();
+}
+const DOW_KR=['일','월','화','수','목','금','토'];
+function fmtD(d){return `${key(d)}(${DOW_KR[d.getDay()]})`;}
+function updatePreview(){
+ const box=document.getElementById('schedulePreview'); if(!box)return;
+ const st=document.getElementById('start').value;
+ if(!st){box.textContent='시작일을 선택하면 첫 연재일/마감일이 여기에 표시됩니다.';return;}
+ const wd=+document.getElementById('weekday').value;
+ const off={same:0,prev1:-1,prev2:-2,prev3:-3}[document.getElementById('deadline').value]??0;
+ const rel=calcFirstRelease(st,wd);
+ const dl=new Date(rel); dl.setDate(dl.getDate()+off);
+ box.innerHTML=`첫 연재일 <b>${fmtD(rel)}</b> → 첫 마감일 <b>${fmtD(dl)}</b>`;
+}
+function addChangeRow(ep,interval,silent){
+ const box=document.getElementById('aChanges');
+ if(ep==null){
+  const rows=readChanges();
+  const base=+document.getElementById('aEpisode').value||1;
+  ep=rows.length?rows[rows.length-1].ep+5:base+5;
+  interval=7;
+ }
+ const r=document.createElement('div');r.className='chRow';
+ r.innerHTML=`<input type="number" min="1" class="chEp" value="${ep}" oninput="updateAuthorPreview()"> <span>화부터</span> <input type="number" min="1" max="20" class="chIv" value="${interval}" oninput="updateAuthorPreview()"> <span>일마다</span> <button type="button" class="mini" title="삭제" onclick="this.parentNode.remove();updateAuthorPreview()">✕</button>`;
+ box.appendChild(r);
+ if(!silent)updateAuthorPreview();
+}
+function readChanges(){
+ const base=+document.getElementById('aEpisode').value||1;
+ const m={};
+ document.querySelectorAll('#aChanges .chRow').forEach(r=>{
+  const ep=parseInt(r.querySelector('.chEp').value,10);
+  if(isNaN(ep)||ep<=base)return;
+  m[ep]=clamp(r.querySelector('.chIv').value,1,20,7);
+ });
+ return Object.keys(m).map(Number).sort((x,y)=>x-y).map(ep=>({ep,interval:m[ep]}));
+}
+function toggleAuthorFields(){
+ document.getElementById('authorFields').style.display=document.getElementById('aEnabled').checked?'':'none';
+ updateAuthorPreview();
+}
+function updateAuthorPreview(){
+ const box=document.getElementById('authorPreview'); if(!box)return;
+ const st=document.getElementById('aStart').value;
+ if(!st){box.textContent='시작일을 선택하면 첫 작가 마감일이 표시됩니다.';return;}
+ const raw=document.getElementById('aInterval').value;
+ const n=clamp(raw,1,20,7);
+ const bad=raw!==''&&(+raw<1||+raw>20);
+ const ep=+document.getElementById('aEpisode').value||1;
+ const tmp={author:{start:st,episode:ep,interval:n,changes:readChanges(),shifts:[]}};
+ const fmtE=i=>{const x=authorSchedule(tmp,i);return `${x.ep}화 ${fmtD(x.deadline)}`;};
+ let html=`<b>${n}일마다</b> 최종고 마감 → ${[0,1,2].map(fmtE).join(' · ')} …`;
+ tmp.author.changes.forEach(c=>{
+  const i=c.ep-ep;
+  html+=`<br>↳ <b>${c.ep}화부터 ${c.interval}일마다</b> → ${[i-1,i,i+1].filter(k=>k>=0).map(fmtE).join(' · ')} …`;
+ });
+ const ignored=document.querySelectorAll('#aChanges .chRow').length>tmp.author.changes.length;
+ if(ignored) html+='<br><span style="color:#c5221f">시작 회차 이하이거나 비어 있는 변경 회차는 저장되지 않습니다.</span>';
+ box.innerHTML=html+(bad?'<br><span style="color:#c5221f">마감 주기는 1~20 사이 숫자로 저장됩니다.</span>':'');
+}
+function saveWork(){
+ const data=getFormData();
+ if(!data.name||!data.start){alert('작품명과 시작일을 입력해주세요.');return;}
+ if(data.author.enabled&&!data.author.start){alert('작가 마감 시작일을 입력해주세요.');return;}
+ const editId=document.getElementById('editId').value;
+ if(editId){
+   const id=+editId;
+   const idx=works.findIndex(w=>w.id===id);
+   if(idx>=0) works[idx]={...works[idx],...data,author:{...data.author,shifts:works[idx].author?.shifts||[]}};
+ }else{
+   works.push({id:Date.now(),...data,author:{...data.author,shifts:[]}});
+ }
+ save();closeModal();render();
+}
+function duplicateWork(id){
+ const w=works.find(x=>x.id===id); if(!w)return;
+ const copy={...w,name:w.name+' (복사본)',author:{...normAuthor(w.author),shifts:[]}};
+ openModal(copy);
+ document.getElementById('editId').value='';
+ document.getElementById('modalTitle').textContent='작품 추가';
+ document.getElementById('saveWorkBtn').textContent='추가';
+}
+function delWork(id){
+ if(!confirm('이 작품을 삭제할까요?'))return;
+ works=works.filter(w=>w.id!==id);
+ // 삭제된 작품의 개별 수정/완료 체크/메모 잔여 데이터 정리
+ Object.keys(overrides).forEach(k=>{if(k.startsWith(id+'_'))delete overrides[k];});
+ Object.keys(completed).forEach(k=>{if(k.startsWith(id+'_'))delete completed[k];});
+ delete notes[id];
+ saveOverrides();saveCompleted();saveNotes();
+ save();render();
+}
+function moveMonth(n){view.setMonth(view.getMonth()+n);render();}
+function goToday(){view=new Date();view.setDate(1);render();}
+function dateOnly(s){let [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function key(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+let showRelease = false; // 기본값: 마감만 표시
+let showDateNotes = false; // 기본값: 날짜 메모 숨김
+let showAuthor = true; // 기본값: 작가 마감 표시
+function toggleAuthor(){
+ showAuthor=!showAuthor;
+ const b=document.getElementById('authorToggle');
+ b.classList.toggle('active',showAuthor);
+ b.textContent=showAuthor?'작가 마감 숨기기':'작가 마감 보기';
+ render();
+}
+const overrides=JSON.parse(localStorage.getItem('workCalendarOverridesV1')||'{}');
+const completed=JSON.parse(localStorage.getItem('workCalendarCompletedV1')||'{}');
+const notes=JSON.parse(localStorage.getItem('workCalendarNotesV1')||'{}');
+const dateNotes=JSON.parse(localStorage.getItem('workCalendarDateNotesV1')||'{}');
+function saveOverrides(){localStorage.setItem('workCalendarOverridesV1',JSON.stringify(overrides));if(window.cloudPush)cloudPush();}
+function saveCompleted(){localStorage.setItem('workCalendarCompletedV1',JSON.stringify(completed));if(window.cloudPush)cloudPush();}
+function saveNotes(){localStorage.setItem('workCalendarNotesV1',JSON.stringify(notes));if(window.cloudPush)cloudPush();}
+function saveDateNotes(){localStorage.setItem('workCalendarDateNotesV1',JSON.stringify(dateNotes));if(window.cloudPush)cloudPush();}
+function toggleDateNotes(){
+ showDateNotes=!showDateNotes;
+ const b=document.getElementById('dateNoteToggle');
+ b.classList.toggle('active',showDateNotes);
+ b.textContent=showDateNotes?'날짜 메모 숨기기':'날짜 메모 보기';
+ render();
+}
+let dateNoteContext=null;
+function openDateNoteModal(dateKey){
+ dateNoteContext=dateKey;
+ document.getElementById('dateNoteModalTitle').textContent=`${dateKey} 메모`;
+ document.getElementById('dateNoteText').value=dateNotes[dateKey]||'';
+ document.getElementById('dateNoteDelBtn').style.display=dateNotes[dateKey]?'':'none';
+ document.getElementById('dateNoteModal').classList.add('show');
+}
+function closeDateNoteModal(){document.getElementById('dateNoteModal').classList.remove('show');dateNoteContext=null;}
+function saveDateNote(){
+ if(!dateNoteContext)return;
+ const v=document.getElementById('dateNoteText').value.trim();
+ if(v) dateNotes[dateNoteContext]=v; else delete dateNotes[dateNoteContext];
+ saveDateNotes(); closeDateNoteModal(); render();
+}
+function deleteDateNote(){
+ if(!dateNoteContext)return;
+ delete dateNotes[dateNoteContext];
+ saveDateNotes(); closeDateNoteModal(); render();
+}
+
+
+function shiftDaysFor(w,ep){
+ return (w.shifts||[]).filter(sh=>sh.ep<=ep).reduce((sum,sh)=>sum+sh.days,0);
+}
+// 시작일 이후 '연재 요일'에 해당하는 첫 날짜 (연재 요일 설정을 실제로 반영)
+function calcFirstRelease(startStr, weekday){
+ const s=dateOnly(startStr);
+ if(weekday!=null && !isNaN(weekday)) s.setDate(s.getDate()+((weekday-s.getDay()+7)%7));
+ return s;
+}
+function firstReleaseDate(w){
+ return calcFirstRelease(w.start, (w.weekday==null||w.weekday==='')?null:+w.weekday);
+}
+function episodeSchedule(w, episodeIndex){
+ const cycleLen=w.cycle+(w.breakWeeks??1);
+ const cycleNo=Math.floor(episodeIndex/w.cycle);
+ const pos=episodeIndex%w.cycle;
+ const ep=w.episode+episodeIndex;
+ const release=firstReleaseDate(w);
+ release.setDate(release.getDate()+cycleNo*cycleLen*7+pos*7+shiftDaysFor(w,ep));
+ const offset={same:0,prev1:-1,prev2:-2,prev3:-3}[w.deadline]??0;
+ const deadline=new Date(release);
+ deadline.setDate(deadline.getDate()+offset);
+ return {ep, release, deadline};
+}
+// 작가 최종고 마감 일정: 첫 마감일부터 N일(1~20)마다 반복
+// 해당 회차에 적용되는 주기: 그 회차 이하의 마지막 '주기 변경' 값, 없으면 기본 주기
+function intervalFor(a, ep){
+ let n=clamp(a.interval,1,20,7);
+ (a.changes||[]).forEach(c=>{if(c.ep<=ep)n=clamp(c.interval,1,20,7);});
+ return n;
+}
+// 'N화부터 M일마다' = (N-1)화 마감에서 M일 뒤가 N화 마감
+function authorSchedule(w, i){
+ const a=w.author;
+ const ep=a.episode+i;
+ const d=dateOnly(a.start);
+ let off=0;
+ for(let k=1;k<=i;k++) off+=intervalFor(a,a.episode+k);
+ const sh=(a.shifts||[]).filter(x=>x.ep<=ep).reduce((s,x)=>s+x.days,0);
+ d.setDate(d.getDate()+off+sh);
+ return {ep, release:d, deadline:new Date(d)};
+}
+function makeDateMap(){
+ const map={};
+ // 달력은 항상 6줄(42칸)이라 앞뒤로 최대 2주가량 다른 달 날짜가 보일 수 있음
+ const from=new Date(view.getFullYear(),view.getMonth(),1);
+ from.setDate(from.getDate()-14);
+ const to=new Date(view.getFullYear(),view.getMonth()+1,0);
+ to.setDate(to.getDate()+14);
+ const limit=new Date(to); limit.setDate(limit.getDate()+120); // 이 날짜를 넘으면 더 계산할 필요 없음
+ works.forEach(w=>{
+   // 1화(i=0)부터 시작: 시작일 이전에는 회차가 생기지 않도록 함.
+   // 보이는 달 범위를 넘어갈 때까지 계산(예전의 '최대 80회차' 제한 제거).
+   for(let i=0;i<5000;i++){
+     const s=episodeSchedule(w,i);
+     if(!s) continue;
+     if(w.finalEpisode && s.ep>w.finalEpisode) break;
+     if(s.release>limit) break;
+     const oid=w.id+'_'+s.ep;
+     const override=overrides[oid];
+     const deadlineDate=override?dateOnly(override):s.deadline;
+     const dk=key(deadlineDate);
+     (map[dk]??=[]).push({w,s,type:'마감',overridden:!!override});
+     const rk=key(s.release);
+     (map[rk]??=[]).push({w,s,type:'연재'});
+   }
+   // Show the single original release weekday during each break cycle as 휴재,
+   // only when the release view is enabled.
+   if(w.author&&w.author.enabled&&w.author.start){
+     for(let i=0;i<5000;i++){
+       const s=authorSchedule(w,i);
+       if(w.finalEpisode && s.ep>w.finalEpisode) break;
+       if(s.deadline>limit) break;
+       const ov=overrides[w.id+'_a_'+s.ep];
+       const dd=ov?dateOnly(ov):s.deadline;
+       (map[key(dd)]??=[]).push({w,s,type:'작가마감',overridden:!!ov});
+     }
+   }
+   if(showRelease){
+     for(let c=0;c<1000;c++){
+       const lastEp=w.episode+c*w.cycle+w.cycle-1;
+       if(w.finalEpisode && lastEp>=w.finalEpisode) break;
+       const base=firstReleaseDate(w);
+       base.setDate(base.getDate()+c*(w.cycle+(w.breakWeeks??1))*7+w.cycle*7+shiftDaysFor(w,lastEp));
+       if(base>limit) break;
+       for(let bw=0;bw<(w.breakWeeks??1);bw++){
+         const d=new Date(base); d.setDate(base.getDate()+bw*7);
+         if(d>=from&&d<=to){
+           (map[key(d)]??=[]).push({w,s:null,type:'휴재'});
+         }
+       }
+     }
+   }
+ });
+ return map;
+}
+let dragItem=null;
+let moveContext=null;
+function editDeadline(item,prefillKey){
+ const {w,s}=item;
+ const isA=item.type==='작가마감';
+ const oid=w.id+(isA?'_a_':'_')+s.ep;
+ const current=overrides[oid]||key(s.deadline);
+ moveContext={workId:w.id,ep:s.ep,fromKey:current,autoKey:key(s.deadline),isA};
+ document.getElementById('moveModalTitle').textContent=`${w.name} ${s.ep}화 ${isA?'작가 최종고 ':''}마감일 변경`;
+ document.getElementById('moveModalHint').innerHTML=`기본(자동) 마감일: <b>${key(s.deadline)}</b>${overrides[oid]?` · 현재 지정된 마감일: <b>${current}</b>`:''}`;
+ document.getElementById('moveDate').value=prefillKey||current;
+ document.getElementById('cascadeCheck').checked=!!prefillKey;
+ document.getElementById('moveModal').classList.add('show');
+}
+function closeMoveModal(){document.getElementById('moveModal').classList.remove('show');moveContext=null;}
+function confirmMove(){
+ if(!moveContext)return;
+ const {workId,ep,fromKey,autoKey,isA}=moveContext;
+ const toKey=document.getElementById('moveDate').value;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(toKey)){alert('올바른 날짜를 선택해주세요.');return;}
+ const w=works.find(x=>x.id===workId); if(!w)return;
+ const cascade=document.getElementById('cascadeCheck').checked;
+ const oid=workId+(isA?'_a_':'_')+ep;
+ if(toKey===fromKey){closeMoveModal();return;}
+ if(cascade){
+   // 이미 개별 수정(override)된 회차여도, '자동 계산된 마감일' 기준으로 밀어야 새 날짜에 정확히 도착함
+   const delta=Math.round((dateOnly(toKey)-dateOnly(autoKey))/86400000);
+   const tgt=isA?w.author:w;
+   if(delta!==0){ tgt.shifts=tgt.shifts||[]; tgt.shifts.push({ep,days:delta}); }
+   delete overrides[oid];
+   saveOverrides();
+ }else{
+   if(toKey===autoKey) delete overrides[oid]; else overrides[oid]=toKey;
+   saveOverrides();
+ }
+ save(); closeMoveModal(); render();
+}
+function resetShifts(id){
+ const w=works.find(x=>x.id===id); if(!w)return;
+ if(!confirm(`${w.name}의 밀린 일정을 모두 초기화하고 원래 자동 계산된 일정으로 되돌릴까요?`))return;
+ w.shifts=[]; if(w.author) w.author.shifts=[]; save(); render();
+}
+function toggleRelease(){
+ showRelease=!showRelease;
+ const b=document.getElementById('releaseToggle');
+ b.classList.toggle('active',showRelease);
+ b.textContent=showRelease?'연재일 숨기기':'연재일 보기';
+ document.getElementById('viewMode').textContent=showRelease?'현재: 마감 + 연재/휴재 표시':'현재: 마감일만 표시';
+ render();
+}
+function renderWorks(){
+ document.getElementById('works').innerHTML=works.map(w=>`
+ <div class="work">
+  <span class="dot" style="background:${w.color}"></span>
+  <label onclick="openModal(works.find(x=>x.id===${w.id}))" title="클릭하여 작품 설정 수정">
+   ${esc(w.name)} <span style="color:#777">(${w.cycle}주+${w.breakWeeks??1}주 휴재)</span>${w.author?.enabled?`<br><span style="color:#b45309;font-size:12px">✍ 작가 ${w.author.interval}일마다 마감${(w.author.changes||[]).map(c=>` → ${c.ep}화~ ${c.interval}일`).join('')}</span>`:''}
+  </label>
+  <div class="work-actions">
+   ${((w.shifts&&w.shifts.length)||(w.author?.shifts?.length))?`<button class="mini" onclick="resetShifts(${w.id})" title="밀린 일정 초기화">↺</button>`:''}
+   <button class="mini" onclick="openModal(works.find(x=>x.id===${w.id}))" title="설정 수정">⚙</button>
+   <button class="mini" onclick="duplicateWork(${w.id})" title="이 설정을 복사하여 새 작품 추가">⧉</button>
+   <button class="del" onclick="delWork(${w.id})" title="삭제">×</button>
+  </div>
+ </div>`).join('');
+}
+function toggleDone(workId,ep){const k=workId+'_'+ep;if(completed[k])delete completed[k];else completed[k]=true;saveCompleted();render();}
+function renderNotes(){document.getElementById('notes').innerHTML=works.map(w=>`<div class="noteCard"><div class="noteTitle"><span class="dot" style="background:${w.color};display:inline-block"></span> ${esc(w.name)}</div><textarea placeholder="마감 관련 메모..." oninput="notes[${w.id}]=this.value;saveNotes()">${esc(notes[w.id]||'')}</textarea></div>`).join('');}
+function render(){
+ renderWorks();
+ renderNotes();
+ const y=view.getFullYear(),m=view.getMonth();
+ document.getElementById('monthTitle').textContent=`${y}년 ${m+1}월`;
+ const cal=document.getElementById('calendar'); cal.innerHTML='';
+ ['일','월','화','수','목','금','토'].forEach(x=>{let e=document.createElement('div');e.className='dow';e.textContent=x;cal.appendChild(e);});
+ const first=new Date(y,m,1), start=new Date(y,m,1-first.getDay());
+ const dateMap=makeDateMap();
+ for(let i=0;i<42;i++){
+  let d=new Date(start);d.setDate(start.getDate()+i);
+  let cell=document.createElement('div');cell.className='cell'+(d.getMonth()!==m?' empty':'');
+  const cellKey=key(d);
+  cell.ondragover=(e)=>{if(dragItem){e.preventDefault();cell.classList.add('dragover');}};
+  cell.ondragleave=()=>{cell.classList.remove('dragover');};
+  cell.ondrop=(e)=>{
+    e.preventDefault();cell.classList.remove('dragover');
+    if(!dragItem)return;
+    const item=dragItem; dragItem=null;
+    editDeadline(item,cellKey);
+  };
+  let n=document.createElement('div');n.className='num';
+  if(key(d)===key(new Date()))n.className+=' today';
+  n.textContent=d.getDate();cell.appendChild(n);
+  if(showDateNotes){
+    n.style.cursor='pointer';
+    n.title='클릭해서 이 날짜에 메모를 추가/수정하세요';
+    n.onclick=()=>openDateNoteModal(cellKey);
+    if(dateNotes[cellKey]){
+      let noteEl=document.createElement('div');
+      noteEl.className='event';
+      noteEl.style.cssText='background:#fef7e0;color:#5f4300;cursor:pointer;white-space:normal;word-break:break-word';
+      noteEl.textContent='📝 '+dateNotes[cellKey];
+      noteEl.title='클릭해서 메모 수정';
+      noteEl.onclick=()=>openDateNoteModal(cellKey);
+      cell.appendChild(noteEl);
+    }
+  }
+  (dateMap[key(d)]||[]).forEach(item=>{
+    // Default: only deadlines. Release events are visible only when toggled.
+    if(item.type==='마감'){
+      let ev=document.createElement('div');ev.className='event';ev.style.background=item.w.color;
+      ev.style.cursor='grab';ev.title='드래그해서 날짜를 옮기거나, 클릭해서 직접 날짜를 입력할 수 있습니다.';
+      ev.draggable=true;
+      const ck=completed[item.w.id+'_'+item.s.ep]===true;
+      ev.innerHTML=`<div style="cursor:pointer"><input class="done" type="checkbox" ${ck?'checked':''} onclick="event.stopPropagation();toggleDone(${item.w.id},${item.s.ep})"> <b style="${ck?'text-decoration:line-through;opacity:.55':''}">${esc(item.w.name)}</b><br><span class="small">${item.s.ep}화 · 마감${item.overridden?' · 수정됨':''}${(item.w.shifts&&item.w.shifts.some(sh=>sh.ep<=item.s.ep))?' · 일정밀림':''}</span></div>`;
+      ev.onclick=(e)=>{if(e.target.tagName!=='INPUT') editDeadline(item)};
+      ev.ondragstart=(e)=>{dragItem=item; ev.classList.add('dragging'); e.dataTransfer.effectAllowed='move';};
+      ev.ondragend=()=>{ev.classList.remove('dragging'); dragItem=null;};
+      cell.appendChild(ev);
+    } else if(showAuthor && item.type==='작가마감'){
+      let ev=document.createElement('div');ev.className='event author';ev.style.borderLeft=`5px solid ${item.w.color}`;
+      ev.style.cursor='grab';ev.title='작가 최종고 마감 · 드래그하거나 클릭해서 날짜를 바꿀 수 있습니다.';
+      ev.draggable=true;
+      const ck=completed[item.w.id+'_a_'+item.s.ep]===true;
+      ev.innerHTML=`<div style="cursor:pointer"><input class="done" type="checkbox" ${ck?'checked':''} onclick="event.stopPropagation();toggleDone(${item.w.id},'a_${item.s.ep}')"> <b style="${ck?'text-decoration:line-through;opacity:.55':''}">✍ ${esc(item.w.name)}</b><br><span class="small">${item.s.ep}화 · 작가 최종고${item.overridden?' · 수정됨':''}${(item.w.author.shifts||[]).some(sh=>sh.ep<=item.s.ep)?' · 일정밀림':''}</span></div>`;
+      ev.onclick=(e)=>{if(e.target.tagName!=='INPUT') editDeadline(item)};
+      ev.ondragstart=(e)=>{dragItem=item; ev.classList.add('dragging'); e.dataTransfer.effectAllowed='move';};
+      ev.ondragend=()=>{ev.classList.remove('dragging'); dragItem=null;};
+      cell.appendChild(ev);
+    } else if(showRelease && item.type==='연재'){
+      let ev=document.createElement('div');ev.className='event';ev.style.background='#f1f3f4';ev.style.color='#5f6368';
+      ev.innerHTML=`<b>${esc(item.w.name)}</b><br><span class="small">${item.s.ep}화 · 연재</span>`;
+      cell.appendChild(ev);
+    } else if(showRelease && item.type==='휴재'){
+      let ev=document.createElement('div');ev.className='event';ev.style.background='#f8f9fa';ev.style.color='#5f6368';
+      ev.innerHTML=`<b>${esc(item.w.name)}</b><br><span class="small">휴재</span>`;
+      cell.appendChild(ev);
+    }
+  });
+  cal.appendChild(cell);
+ }
+}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+
+<script>
+/* ================= 구글 로그인 + Firebase 동기화 =================
+   ▼ 여기에 firebaseConfig를 넣어두면 어느 컴퓨터에서 열어도 설정 입력 없이 바로 로그인할 수 있습니다.
+   (비워두면 화면의 '☁ 동기화 설정' 버튼으로 컴퓨터마다 붙여넣을 수 있습니다) */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA_W6zLhHmplxu5rkaTFMGRNdM7GLPnSEA",
+  authDomain: "webtoon-pd-calendar.firebaseapp.com",
+  projectId: "webtoon-pd-calendar",
+  storageBucket: "webtoon-pd-calendar.firebasestorage.app",
+  messagingSenderId: "145822699450",
+  appId: "1:145822699450:web:9f1337410d948d51aa9783"
+};
+
+const CFG_KEY='workCalendarFirebaseCfgV1';
+const FB_VER='10.12.2';
+const CLIENT_ID=Math.random().toString(36).slice(2);
+let fbUser=null, fbDoc=null, fbUnsub=null, pushTimer=null, cloudReady=false, syncState='off';
+
+function getCfg(){
+ if(FIREBASE_CONFIG) return FIREBASE_CONFIG;
+ try{return JSON.parse(localStorage.getItem(CFG_KEY)||'null');}catch(e){return null;}
+}
+function parseCfgText(t){
+ const m=t.match(/\{[\s\S]*\}/); if(!m) return null;
+ let body=m[0];
+ try{return JSON.parse(body);}catch(e){}
+ // JS 객체 표기(따옴표 없는 키, 작은따옴표, 끝 쉼표)를 JSON으로 변환
+ body=body.replace(/\/\/.*$/gm,'').replace(/'/g,'"').replace(/([{,]\s*)([A-Za-z_$][\w$]*)\s*:/g,'$1"$2":').replace(/,\s*}/g,'}');
+ try{return JSON.parse(body);}catch(e){return null;}
+}
+function openCfg(){
+ const c=getCfg();
+ document.getElementById('cfgText').value=c?JSON.stringify(c,null,2):'';
+ document.getElementById('cfgClearBtn').style.display=(c&&!FIREBASE_CONFIG)?'':'none';
+ document.getElementById('cfgModal').classList.add('show');
+}
+function closeCfg(){document.getElementById('cfgModal').classList.remove('show');}
+function saveCfg(){
+ const c=parseCfgText(document.getElementById('cfgText').value);
+ if(!c||!c.apiKey||!c.authDomain||!c.projectId){alert('firebaseConfig를 인식하지 못했어요. apiKey, authDomain, projectId가 포함되어 있는지 확인해주세요.');return;}
+ localStorage.setItem(CFG_KEY,JSON.stringify(c));
+ closeCfg(); location.reload();
+}
+function clearCfg(){
+ if(!confirm('이 컴퓨터의 동기화 설정을 지울까요? (캘린더 데이터는 지워지지 않습니다)'))return;
+ localStorage.removeItem(CFG_KEY); location.reload();
+}
+
+function snapshotData(){
+ return {works,overrides,completed,notes,dateNotes};
+}
+function replaceObj(target,src){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,src||{});}
+function applyData(d){
+ works=(d.works||[]).map(normWork);
+ replaceObj(overrides,d.overrides);replaceObj(completed,d.completed);replaceObj(notes,d.notes);replaceObj(dateNotes,d.dateNotes);
+ // 로컬에도 저장(클라우드로 다시 올리지는 않음)
+ localStorage.setItem(KEY,JSON.stringify(works));
+ localStorage.setItem('workCalendarOverridesV1',JSON.stringify(overrides));
+ localStorage.setItem('workCalendarCompletedV1',JSON.stringify(completed));
+ localStorage.setItem('workCalendarNotesV1',JSON.stringify(notes));
+ localStorage.setItem('workCalendarDateNotesV1',JSON.stringify(dateNotes));
+ // 메모 입력 중이면 커서가 튀지 않도록 메모 패널은 다시 그리지 않음
+ const typing=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#notes');
+ if(typing){renderWorksAndCalendarOnly();}else render();
+}
+function renderWorksAndCalendarOnly(){const rn=renderNotes;renderNotes=function(){};try{render();}finally{renderNotes=rn;}}
+function hasLocalData(){const d=snapshotData();return d.works.length||Object.keys(d.overrides).length||Object.keys(d.notes).length||Object.keys(d.dateNotes).length;}
+
+function cloudPush(){
+ if(!cloudReady||!fbDoc) return;
+ setSync('saving');
+ clearTimeout(pushTimer);
+ pushTimer=setTimeout(()=>{
+  fbDoc.set({data:JSON.stringify(snapshotData()),updatedAt:Date.now(),clientId:CLIENT_ID})
+   .then(()=>setSync('ok')).catch(e=>{console.error(e);setSync('error',e.message);});
+ },700);
+}
+
+function setSync(st,msg){syncState=st;renderSync(msg);}
+function renderSync(msg){
+ const el=document.getElementById('syncArea'); if(!el) return;
+ const cfg=getCfg();
+ if(!cfg){el.innerHTML=`<button class="syncBtn" onclick="openCfg()">☁ 동기화 설정</button>`;return;}
+ if(syncState==='loading'){el.innerHTML='☁ 연결 중…';return;}
+ if(syncState==='nofile'){el.innerHTML=`<span style="color:#c5221f" title="구글 로그인은 웹 주소(https://)로 연 페이지에서만 동작합니다">⚠ 파일로 열면 로그인 불가 · 웹 주소로 열어주세요</span> <button class="syncBtn" onclick="openCfg()">⚙</button>`;return;}
+ if(!fbUser){el.innerHTML=`<button class="syncBtn" onclick="googleLogin()">G 구글 로그인</button><button class="syncBtn" onclick="openCfg()" title="동기화 설정">⚙</button>${msg?`<span style="color:#c5221f">${esc(msg)}</span>`:''}`;return;}
+ const dot={ok:'#1e8e3e',saving:'#f9ab00',error:'#d93025'}[syncState]||'#9aa0a6';
+ const label={ok:'동기화됨',saving:'저장 중…',error:'동기화 오류'}[syncState]||'';
+ el.innerHTML=`<span title="${esc(msg||'')}"><span class="syncDot" style="background:${dot}"></span>${label}</span><span style="color:#202124">${esc(fbUser.email||fbUser.displayName||'')}</span><button class="syncBtn" onclick="googleLogout()">로그아웃</button>`;
+}
+
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(new Error('스크립트 로드 실패: '+src));document.head.appendChild(s);});}
+
+async function initCloud(){
+ const cfg=getCfg();
+ if(!cfg){renderSync();return;}
+ if(location.protocol==='file:'){setSync('nofile');return;}
+ setSync('loading');
+ try{
+  for(const m of ['app','auth','firestore']) await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`);
+  if(!firebase.apps.length) firebase.initializeApp(cfg);
+  firebase.auth().onAuthStateChanged(onAuth);
+ }catch(e){console.error(e);setSync('error');renderSync(e.message);}
+}
+function googleLogin(){
+ const p=new firebase.auth.GoogleAuthProvider();
+ p.setCustomParameters({prompt:'select_account'});
+ firebase.auth().signInWithPopup(p).catch(e=>{
+  console.error(e);
+  const m=e.code==='auth/unauthorized-domain'?'이 주소가 Firebase 승인된 도메인에 없습니다':e.code==='auth/popup-blocked'?'팝업이 차단됐어요. 팝업을 허용해주세요':(e.message||'로그인 실패');
+  syncState='off';renderSync(m);
+ });
+}
+function googleLogout(){
+ if(!confirm('로그아웃할까요? (이 컴퓨터의 데이터는 그대로 남습니다)'))return;
+ firebase.auth().signOut();
+}
+async function onAuth(user){
+ if(fbUnsub){fbUnsub();fbUnsub=null;}
+ cloudReady=false; fbUser=user; fbDoc=null;
+ if(!user){syncState='off';renderSync();return;}
+ setSync('saving');
+ fbDoc=firebase.firestore().collection('calendars').doc(user.uid);
+ try{
+  const snap=await fbDoc.get();
+  if(snap.exists&&snap.data().data){
+   const remote=JSON.parse(snap.data().data);
+   const same=JSON.stringify(remote)===JSON.stringify(snapshotData());
+   if(!same&&hasLocalData()&&(remote.works||[]).length){
+    const useCloud=confirm('클라우드에 저장된 캘린더가 있어요.\n\n[확인] 클라우드 데이터 불러오기 (이 컴퓨터의 데이터는 덮어씀)\n[취소] 이 컴퓨터의 데이터를 클라우드에 올리기 (클라우드 데이터는 덮어씀)');
+    if(useCloud) applyData(remote);
+    cloudReady=true;
+    if(!useCloud) cloudPush(); else setSync('ok');
+   }else{
+    if(!same) applyData(remote);
+    cloudReady=true; setSync('ok');
+   }
+  }else{
+   cloudReady=true; cloudPush(); // 처음 로그인: 이 컴퓨터 데이터를 클라우드로 업로드
+  }
+  // 다른 컴퓨터에서 바꾼 내용 실시간 반영
+  fbUnsub=fbDoc.onSnapshot(doc=>{
+   if(!doc.exists||doc.metadata.hasPendingWrites) return;
+   const d=doc.data(); if(!d||d.clientId===CLIENT_ID||!d.data) return;
+   applyData(JSON.parse(d.data)); setSync('ok');
+  },e=>{console.error(e);setSync('error',e.message);});
+ }catch(e){
+  console.error(e);
+  setSync('error',e.code==='permission-denied'?'Firestore 보안 규칙을 확인해주세요':e.message);
+ }
+}
+initCloud();
+</script>
+</body>
+</html>
