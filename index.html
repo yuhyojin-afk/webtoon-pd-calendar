@@ -15,6 +15,8 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 .chRow{display:flex;gap:6px;align-items:center;margin:4px 0;font-size:13px}.chRow input{width:70px!important;padding:7px!important}
 .syncBtn{border:1px solid #dadce0;background:#fff;border-radius:18px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:600}.syncBtn:hover{background:#f1f3f4}.syncDot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
 .work.off label{opacity:.45}.work.off .dot{background:transparent!important;box-shadow:inset 0 0 0 2px #bbb}.vis{width:16px;height:16px;margin:0;cursor:pointer;flex:none}
+.legend summary{cursor:pointer;font-weight:600;color:#5f6368;list-style:none}.legend summary::-webkit-details-marker{display:none}.legend[open] summary{color:#202124}
+.top button{white-space:nowrap;flex:none}.top{gap:8px}#workFilterBtn{max-width:240px;overflow:hidden;text-overflow:ellipsis}#viewMode{white-space:nowrap}@media (max-width:1550px){#viewMode{display:none}}.fWrap{position:relative}.fPop{display:none;position:absolute;top:44px;left:0;z-index:50;width:300px;background:#fff;border:1px solid #dadce0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:10px}.fPop.show{display:block}.fHead{font-size:12px;color:#5f6368;margin:2px 4px 8px}.fSearch{width:100%;padding:9px 10px;border:2px solid #1a73e8;border-radius:8px;font-size:13px;outline:none}.fList{max-height:320px;overflow:auto;margin-top:8px}.fItem{display:flex;align-items:center;gap:10px;padding:6px 6px;border-radius:6px;cursor:pointer}.fItem:hover{background:#f1f3f4}.fItem input{width:16px;height:16px;margin:0;cursor:pointer}.chip{padding:3px 9px;border-radius:5px;font-size:13px;color:#202124}.fFoot{border-top:1px solid #eee;margin-top:6px;padding-top:6px;text-align:right}.toggle.filtered{background:#e8f0fe;color:#1967d2;border-color:#aecbfa;font-weight:600}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.28);align-items:center;justify-content:center}.modal.show{display:flex}.box{background:#fff;border-radius:12px;width:420px;max-height:92vh;overflow:auto;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,.18)}.box h2{font-size:18px;margin:0 0 18px}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#5f6368;margin-bottom:5px}.field input,.field select{width:100%;padding:10px;border:1px solid #dadce0;border-radius:6px;font-size:14px}.field input[type=color]{width:56px;height:38px;padding:3px;cursor:pointer}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.primary{background:#1a73e8;color:#fff;border-color:#1a73e8}
 </style>
 </head>
@@ -23,8 +25,8 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <aside class="side">
 <h1>📅 작품 마감 캘린더</h1>
 <button class="btn" onclick="openModal()">＋ 작품 추가</button>
-<div class="section"><h3 style="display:flex;align-items:center;gap:6px">작품 <span id="filterInfo" style="font-weight:400;color:#1967d2"></span><span style="margin-left:auto;display:flex;gap:2px"><button class="mini" onclick="showAll()" title="모든 작품을 캘린더에 표시">전체 보기</button></span></h3><div id="works"></div></div>
-<div class="legend">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>☑ 체크로 작품별 표시/숨김 · ◎ 이 작품만 보기 · "전체 보기"로 되돌리기<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br>"날짜 메모 보기"를 켜면 날짜 숫자를 클릭해 그날 메모를 남길 수 있습니다. 끄면 메모는 저장된 채로 화면에서만 숨겨집니다.</div>
+<div class="section"><h3>작품</h3><div id="works"></div></div>
+<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br>"날짜 메모 보기"를 켜면 날짜 숫자를 클릭해 그날 메모를 남길 수 있습니다. 끄면 메모는 저장된 채로 화면에서만 숨겨집니다.</div></details>
 </aside>
 <main class="main">
 <div class="top">
@@ -33,11 +35,19 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <button class="toggle" id="releaseToggle" onclick="toggleRelease()">연재일 보기</button>
 <button class="toggle active" id="authorToggle" onclick="toggleAuthor()">작가 마감 숨기기</button>
 <button class="toggle" id="dateNoteToggle" onclick="toggleDateNotes()">날짜 메모 보기</button>
+<div class="fWrap" id="fWrap"><button class="toggle" id="workFilterBtn" onclick="toggleFilterPop(event)">☰ 작품명 ▾</button>
+<div class="fPop" id="workFilterPop" onclick="event.stopPropagation()">
+ <div class="fHead">작품명 <b>값을 포함하는 데이터</b></div>
+ <input id="workFilterSearch" class="fSearch" placeholder="하나 이상의 작품을 선택하세요." oninput="renderFilterList()">
+ <div id="workFilterList" class="fList"></div>
+ <div class="fFoot"><button class="mini" onclick="clearFilter()">선택 해제 (전체 보기)</button></div>
+</div></div>
+<button class="toggle active" id="notesToggle" onclick="toggleNotesPanel()">메모 숨기기</button>
 <span id="viewMode" style="font-size:12px;color:#5f6368">현재: 마감일만 표시</span>
 <span id="syncArea" style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:#5f6368"></span>
 <div class="nav"><button onclick="moveMonth(-1)">‹</button><button onclick="moveMonth(1)">›</button></div>
 </div>
-<div class="content"><div class="calendarWrap"><div class="grid" id="calendar"></div></div><aside class="notes"><div style="font-size:12px;color:#5f6368;margin-bottom:10px;font-weight:600">작품별 마감 메모</div><div id="notes"></div></aside></div>
+<div class="content"><div class="calendarWrap"><div class="grid" id="calendar"></div></div><aside class="notes" id="notesPanel"><div style="font-size:12px;color:#5f6368;margin-bottom:10px;font-weight:600">작품별 마감 메모</div><div id="notes"></div></aside></div>
 </main>
 </div>
 
@@ -250,7 +260,7 @@ function delWork(id){
  Object.keys(overrides).forEach(k=>{if(k.startsWith(id+'_'))delete overrides[k];});
  Object.keys(completed).forEach(k=>{if(k.startsWith(id+'_'))delete completed[k];});
  delete notes[id];
- hiddenWorks.delete(id); saveHidden();
+ selectedWorks.delete(id); saveFilter();
  saveOverrides();saveCompleted();saveNotes();
  save();render();
 }
@@ -260,14 +270,37 @@ function dateOnly(s){let [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,
 function key(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 let showRelease = false; // 기본값: 마감만 표시
 let showDateNotes = false; // 기본값: 날짜 메모 숨김
-// 작품별 필터: 숨긴 작품 id 목록 (이 브라우저에만 저장)
-const HIDDEN_KEY='workCalendarHiddenV1';
-let hiddenWorks=new Set((()=>{try{return JSON.parse(localStorage.getItem(HIDDEN_KEY)||'[]');}catch(e){return [];}})());
-function saveHidden(){try{localStorage.setItem(HIDDEN_KEY,JSON.stringify([...hiddenWorks]));}catch(e){}}
-function isVisible(w){return !hiddenWorks.has(w.id);}
-function toggleVisible(id){if(hiddenWorks.has(id))hiddenWorks.delete(id);else hiddenWorks.add(id);saveHidden();render();}
-function showOnly(id){hiddenWorks=new Set(works.filter(w=>w.id!==id).map(w=>w.id));saveHidden();render();}
-function showAll(){hiddenWorks.clear();saveHidden();render();}
+// 작품별 필터 (노션 방식): 선택한 작품만 표시, 아무것도 선택 안 하면 전체 표시 (이 브라우저에만 저장)
+const FILTER_KEY='workCalendarFilterV1';
+let selectedWorks=new Set((()=>{try{return JSON.parse(localStorage.getItem(FILTER_KEY)||'[]');}catch(e){return [];}})());
+function saveFilter(){try{localStorage.setItem(FILTER_KEY,JSON.stringify([...selectedWorks]));}catch(e){}}
+function cleanFilter(){const ids=new Set(works.map(w=>w.id));[...selectedWorks].forEach(id=>{if(!ids.has(id))selectedWorks.delete(id);});}
+function isVisible(w){return selectedWorks.size===0||selectedWorks.has(w.id);}
+function toggleFilterWork(id){if(selectedWorks.has(id))selectedWorks.delete(id);else selectedWorks.add(id);saveFilter();render();renderFilterList();}
+function clearFilter(){selectedWorks.clear();saveFilter();render();renderFilterList();}
+function toggleFilterPop(e){e.stopPropagation();const p=document.getElementById('workFilterPop');const open=!p.classList.contains('show');p.classList.toggle('show',open);if(open){document.getElementById('workFilterSearch').value='';renderFilterList();setTimeout(()=>document.getElementById('workFilterSearch').focus(),0);}}
+document.addEventListener('click',()=>{const p=document.getElementById('workFilterPop');if(p)p.classList.remove('show');});
+function renderFilterList(){
+ const box=document.getElementById('workFilterList'); if(!box)return;
+ const q=(document.getElementById('workFilterSearch').value||'').trim().toLowerCase();
+ const list=works.filter(w=>!q||w.name.toLowerCase().includes(q));
+ box.innerHTML=list.length?list.map(w=>`<label class="fItem"><input type="checkbox" ${selectedWorks.has(w.id)?'checked':''} onchange="toggleFilterWork(${w.id})"><span class="chip" style="background:${w.color}">${esc(w.name)}</span></label>`).join(''):'<div style="font-size:12px;color:#888;padding:8px">일치하는 작품이 없습니다.</div>';
+}
+function renderFilterBtn(){
+ const b=document.getElementById('workFilterBtn'); if(!b)return;
+ const sel=works.filter(w=>selectedWorks.has(w.id));
+ b.classList.toggle('filtered',sel.length>0);
+ b.textContent=sel.length?`☰ 작품명: ${sel[0].name}${sel.length>1?` 외 ${sel.length-1}`:''} ▾`:'☰ 작품명 ▾';
+}
+// 작품 메모 패널 전체 열기/닫기
+const NOTES_PANEL_KEY='workCalendarNotesPanelV1';
+let showNotesPanel=(()=>{try{return localStorage.getItem(NOTES_PANEL_KEY)!=='0';}catch(e){return true;}})();
+function applyNotesPanel(){
+ const p=document.getElementById('notesPanel'),b=document.getElementById('notesToggle');
+ if(p)p.style.display=showNotesPanel?'':'none';
+ if(b){b.classList.toggle('active',showNotesPanel);b.textContent=showNotesPanel?'메모 숨기기':'메모 보기';}
+}
+function toggleNotesPanel(){showNotesPanel=!showNotesPanel;try{localStorage.setItem(NOTES_PANEL_KEY,showNotesPanel?'1':'0');}catch(e){}applyNotesPanel();}
 let showAuthor = true; // 기본값: 작가 마감 표시
 function toggleAuthor(){
  showAuthor=!showAuthor;
@@ -460,19 +493,14 @@ function toggleRelease(){
  render();
 }
 function renderWorks(){
- const shown=works.filter(isVisible).length;
- const fi=document.getElementById('filterInfo');
- if(fi) fi.textContent=(works.length&&shown<works.length)?`(${shown}/${works.length} 표시 중)`:'';
  document.getElementById('works').innerHTML=works.map(w=>`
- <div class="work${isVisible(w)?'':' off'}">
-  <input type="checkbox" class="vis" ${isVisible(w)?'checked':''} style="accent-color:${w.color}" onclick="toggleVisible(${w.id})" title="체크 해제하면 캘린더에서 숨김">
+ <div class="work">
   <span class="dot" style="background:${w.color}"></span>
   <label onclick="openModal(works.find(x=>x.id===${w.id}))" title="클릭하여 작품 설정 수정">
    ${esc(w.name)} <span style="color:#777">(${w.cycle}주+${w.breakWeeks??1}주 휴재)</span>${w.author?.enabled?`<br><span style="color:#b45309;font-size:12px">✍ 작가 ${w.author.interval}일마다 마감${(w.author.changes||[]).map(c=>` → ${c.ep}화~ ${c.interval}일`).join('')}</span>`:''}
   </label>
   <div class="work-actions">
    ${((w.shifts&&w.shifts.length)||(w.author?.shifts?.length))?`<button class="mini" onclick="resetShifts(${w.id})" title="밀린 일정 초기화">↺</button>`:''}
-   <button class="mini" onclick="showOnly(${w.id})" title="이 작품만 보기">◎</button>
    <button class="mini" onclick="openModal(works.find(x=>x.id===${w.id}))" title="설정 수정">⚙</button>
    <button class="mini" onclick="duplicateWork(${w.id})" title="이 설정을 복사하여 새 작품 추가">⧉</button>
    <button class="del" onclick="delWork(${w.id})" title="삭제">×</button>
@@ -480,10 +508,13 @@ function renderWorks(){
  </div>`).join('');
 }
 function toggleDone(workId,ep){const k=workId+'_'+ep;if(completed[k])delete completed[k];else completed[k]=true;saveCompleted();render();}
-function renderNotes(){document.getElementById('notes').innerHTML=works.filter(isVisible).map(w=>`<div class="noteCard"><div class="noteTitle"><span class="dot" style="background:${w.color};display:inline-block"></span> ${esc(w.name)}</div><textarea placeholder="마감 관련 메모..." oninput="notes[${w.id}]=this.value;saveNotes()">${esc(notes[w.id]||'')}</textarea></div>`).join('');}
+function renderNotes(){document.getElementById('notes').innerHTML=works.map(w=>`<div class="noteCard"><div class="noteTitle"><span class="dot" style="background:${w.color};display:inline-block"></span> ${esc(w.name)}</div><textarea placeholder="마감 관련 메모..." oninput="notes[${w.id}]=this.value;saveNotes()">${esc(notes[w.id]||'')}</textarea></div>`).join('');}
 function render(){
+ cleanFilter();
  renderWorks();
  renderNotes();
+ renderFilterBtn();
+ applyNotesPanel();
  const y=view.getFullYear(),m=view.getMonth();
  document.getElementById('monthTitle').textContent=`${y}년 ${m+1}월`;
  const cal=document.getElementById('calendar'); cal.innerHTML='';
