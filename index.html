@@ -417,7 +417,7 @@ function makeDateMap(){
    if(w.author&&w.author.enabled&&w.author.start){
      for(let i=0;i<5000;i++){
        const s=authorSchedule(w,i);
-       if(w.finalEpisode && s.ep>w.finalEpisode) break;
+       // 작가 최종고 마감은 완결 회차와 별개로 계속 진행(휴재 중 세이브 원고)
        if(s.deadline>limit) break;
        const ov=overrides[w.id+'_a_'+s.ep];
        const dd=ov?dateOnly(ov):s.deadline;
