@@ -70,6 +70,7 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
  <div id="authorFields" style="display:none">
   <div class="field"><label>작가 첫 마감일 <span style="color:#999">(이 날짜가 시작 회차의 마감일)</span></label><input id="aStart" type="date" onchange="updateAuthorPreview()" oninput="updateAuthorPreview()"></div>
   <div class="field"><label>시작 회차</label><input id="aEpisode" type="number" min="1" value="1" oninput="updateAuthorPreview()"></div>
+  <div class="field"><label>작가 최종고 마지막 회차 <span style="color:#999">(선택 · 이 회차까지만 표시 · 비우면 계속 이어짐)</span></label><input id="aEnd" type="number" min="1" placeholder="예: 75" oninput="updateAuthorPreview()"></div>
   <div class="field"><label>마감 주기 <span style="color:#999">(1~20 숫자 입력 · 며칠마다 최종고 마감인지)</span></label>
    <div style="display:flex;gap:8px;align-items:center">
     <input id="aInterval" type="number" min="1" max="20" value="7" style="width:90px" oninput="updateAuthorPreview()"> <span>일마다 마감</span>
@@ -118,8 +119,8 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 const KEY='workCalendarV1';
 function clamp(v,min,max,def){v=parseInt(v,10);if(isNaN(v))v=def;return Math.min(max,Math.max(min,v));}
 function normAuthor(a){
- if(!a)return {enabled:false,start:'',episode:1,interval:7,changes:[],shifts:[]};
- return {enabled:!!a.enabled,start:a.start||'',episode:+a.episode||1,interval:clamp(a.interval,1,20,7),changes:Array.isArray(a.changes)?a.changes:[],shifts:Array.isArray(a.shifts)?a.shifts:[]};
+ if(!a)return {enabled:false,start:'',episode:1,endEpisode:null,interval:7,changes:[],shifts:[]};
+ return {enabled:!!a.enabled,start:a.start||'',episode:+a.episode||1,endEpisode:(+a.endEpisode>0?+a.endEpisode:null),interval:clamp(a.interval,1,20,7),changes:Array.isArray(a.changes)?a.changes:[],shifts:Array.isArray(a.shifts)?a.shifts:[]};
 }
 function normWork(w){return {...w,breakWeeks:(w.breakWeeks===0?0:Math.max(1,+w.breakWeeks||1)),shifts:Array.isArray(w.shifts)?w.shifts:[],author:normAuthor(w.author)};}
 let works=JSON.parse(localStorage.getItem(KEY)||'[]').map(normWork);
@@ -142,6 +143,7 @@ function getFormData(){
   enabled:document.getElementById('aEnabled').checked,
   start:document.getElementById('aStart').value,
   episode:+document.getElementById('aEpisode').value||1,
+  endEpisode:(+document.getElementById('aEnd').value>0?+document.getElementById('aEnd').value:null),
   interval:clamp(document.getElementById('aInterval').value,1,20,7),
   changes:readChanges()
  };
@@ -168,6 +170,7 @@ function openModal(work=null){
  document.getElementById('aStart').value=a.start||document.getElementById('start').value;
  document.getElementById('aEpisode').value=a.enabled?a.episode:(work?.episode||1);
  document.getElementById('aInterval').value=a.interval;
+ document.getElementById('aEnd').value=a.endEpisode||'';
  document.getElementById('aChanges').innerHTML='';
  a.changes.forEach(c=>addChangeRow(c.ep,c.interval,true));
  toggleAuthorFields();
@@ -229,6 +232,11 @@ function updateAuthorPreview(){
  });
  const ignored=document.querySelectorAll('#aChanges .chRow').length>tmp.author.changes.length;
  if(ignored) html+='<br><span style="color:#c5221f">시작 회차 이하이거나 비어 있는 변경 회차는 저장되지 않습니다.</span>';
+ const end=+document.getElementById('aEnd').value||0;
+ const fin=+document.getElementById('finalEpisode').value||0;
+ if(end&&end<ep) html+=`<br><span style="color:#c5221f">⚠ 마지막 회차(${end}화)가 시작 회차(${ep}화)보다 작아서 표시되지 않습니다.</span>`;
+ else if(end) html+=`<br>↳ ${end}화 마감까지 표시`;
+ else html+=`<br>↳ 마지막 회차 없이 계속 표시${fin?` (연재 완결 ${fin}화와 무관)`:''}`;
  box.innerHTML=html+(bad?'<br><span style="color:#c5221f">마감 주기는 1~20 사이 숫자로 저장됩니다.</span>':'');
 }
 function saveWork(){
@@ -417,7 +425,8 @@ function makeDateMap(){
    if(w.author&&w.author.enabled&&w.author.start){
      for(let i=0;i<5000;i++){
        const s=authorSchedule(w,i);
-       // 작가 최종고 마감은 완결 회차와 별개로 계속 진행(휴재 중 세이브 원고)
+       // 작가 마감은 완결 회차와 무관(휴재 중 세이브 원고). 작가 마지막 회차를 정했으면 거기까지만
+       if(w.author.endEpisode && s.ep>w.author.endEpisode) break;
        if(s.deadline>limit) break;
        const ov=overrides[w.id+'_a_'+s.ep];
        const dd=ov?dateOnly(ov):s.deadline;
@@ -497,7 +506,7 @@ function renderWorks(){
  <div class="work">
   <span class="dot" style="background:${w.color}"></span>
   <label onclick="openModal(works.find(x=>x.id===${w.id}))" title="클릭하여 작품 설정 수정">
-   ${esc(w.name)} <span style="color:#777">(${w.cycle}주+${w.breakWeeks??1}주 휴재)</span>${w.author?.enabled?`<br><span style="color:#b45309;font-size:12px">✍ 작가 ${w.author.interval}일마다 마감${(w.author.changes||[]).map(c=>` → ${c.ep}화~ ${c.interval}일`).join('')}</span>`:''}
+   ${esc(w.name)} <span style="color:#777">(${w.cycle}주+${w.breakWeeks??1}주 휴재)</span>${w.author?.enabled?`<br><span style="color:#b45309;font-size:12px">✍ 작가 ${w.author.interval}일마다 마감${(w.author.changes||[]).map(c=>` → ${c.ep}화~ ${c.interval}일`).join('')}${w.author.endEpisode?` (~${w.author.endEpisode}화)`:''}</span>`:''}
   </label>
   <div class="work-actions">
    ${((w.shifts&&w.shifts.length)||(w.author?.shifts?.length))?`<button class="mini" onclick="resetShifts(${w.id})" title="밀린 일정 초기화">↺</button>`:''}
