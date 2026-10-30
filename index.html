@@ -617,6 +617,15 @@ const CFG_KEY='workCalendarFirebaseCfgV1';
 const FB_VER='10.12.2';
 const CLIENT_ID=Math.random().toString(36).slice(2);
 let fbUser=null, fbDoc=null, fbUnsub=null, pushTimer=null, cloudReady=false, syncState='off';
+// 동기화 기록: 이 컴퓨터에서 아직 클라우드에 안 올라간 수정이 있는지(dirty), 마지막으로 맞춘 클라우드 시각(syncedAt)
+const META_KEY='workCalendarSyncMetaV1';
+let syncMeta=(()=>{try{return JSON.parse(localStorage.getItem(META_KEY))||{};}catch(e){return {};}})();
+let editSeq=0;
+function saveMeta(){try{localStorage.setItem(META_KEY,JSON.stringify(syncMeta));}catch(e){}}
+function markLocalEdit(){syncMeta.dirty=true;syncMeta.localAt=Date.now();editSeq++;saveMeta();}
+function markSynced(at){syncMeta.dirty=false;if(at)syncMeta.syncedAt=at;editSeq++;saveMeta();}
+function fmtTime(t){if(!t)return '알 수 없음';const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+function toast(msg){let t=document.getElementById('syncToast');if(!t){t=document.createElement('div');t.id='syncToast';t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#202124;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,.25);transition:opacity .3s';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._h);t._h=setTimeout(()=>{t.style.opacity='0';},3500);}
 
 function getCfg(){
  if(FIREBASE_CONFIG) return FIREBASE_CONFIG;
@@ -652,7 +661,7 @@ function snapshotData(){
  return {works,overrides,completed,notes,dateNotes};
 }
 function replaceObj(target,src){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,src||{});}
-function applyData(d){
+function applyData(d,at){
  works=(d.works||[]).map(normWork);
  replaceObj(overrides,d.overrides);replaceObj(completed,d.completed);replaceObj(notes,d.notes);replaceObj(dateNotes,d.dateNotes);
  // 로컬에도 저장(클라우드로 다시 올리지는 않음)
@@ -661,20 +670,28 @@ function applyData(d){
  localStorage.setItem('workCalendarCompletedV1',JSON.stringify(completed));
  localStorage.setItem('workCalendarNotesV1',JSON.stringify(notes));
  localStorage.setItem('workCalendarDateNotesV1',JSON.stringify(dateNotes));
+ markSynced(at);
  // 메모 입력 중이면 커서가 튀지 않도록 메모 패널은 다시 그리지 않음
  const typing=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#notes');
  if(typing){renderWorksAndCalendarOnly();}else render();
 }
 function renderWorksAndCalendarOnly(){const rn=renderNotes;renderNotes=function(){};try{render();}finally{renderNotes=rn;}}
-function hasLocalData(){const d=snapshotData();return d.works.length||Object.keys(d.overrides).length||Object.keys(d.notes).length||Object.keys(d.dateNotes).length;}
+function hasData(d){return !!(d&&((d.works||[]).length||Object.keys(d.overrides||{}).length||Object.keys(d.notes||{}).length||Object.keys(d.dateNotes||{}).length));}
+function hasLocalData(){return hasData(snapshotData());}
+// 저장 형태(새로 생긴 항목, 기본값 등) 차이는 무시하고 실제 내용만 비교
+function stableStr(x){if(Array.isArray(x))return '['+x.map(stableStr).join(',')+']';if(x&&typeof x==='object')return '{'+Object.keys(x).filter(k=>x[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+stableStr(x[k])).join(',')+'}';return JSON.stringify(x===undefined?null:x);}
+function normData(d){return stableStr({works:(d.works||[]).map(normWork),overrides:d.overrides||{},completed:d.completed||{},notes:d.notes||{},dateNotes:d.dateNotes||{}});}
 
 function cloudPush(){
+ markLocalEdit();
  if(!cloudReady||!fbDoc) return;
  setSync('saving');
  clearTimeout(pushTimer);
  pushTimer=setTimeout(()=>{
-  fbDoc.set({data:JSON.stringify(snapshotData()),updatedAt:Date.now(),clientId:CLIENT_ID})
-   .then(()=>setSync('ok')).catch(e=>{console.error(e);setSync('error',e.message);});
+  const seq=editSeq, at=Date.now();
+  fbDoc.set({data:JSON.stringify(snapshotData()),updatedAt:at,clientId:CLIENT_ID})
+   .then(()=>{syncMeta.syncedAt=at;if(seq===editSeq)syncMeta.dirty=false;saveMeta();setSync('ok');})
+   .catch(e=>{console.error(e);setSync('error',e.message);});
  },700);
 }
 
@@ -729,15 +746,24 @@ async function onAuth(user){
   const snap=await fbDoc.get();
   if(snap.exists&&snap.data().data){
    const remote=JSON.parse(snap.data().data);
-   const same=JSON.stringify(remote)===JSON.stringify(snapshotData());
-   if(!same&&hasLocalData()&&(remote.works||[]).length){
-    const useCloud=confirm('클라우드에 저장된 캘린더가 있어요.\n\n[확인] 클라우드 데이터 불러오기 (이 컴퓨터의 데이터는 덮어씀)\n[취소] 이 컴퓨터의 데이터를 클라우드에 올리기 (클라우드 데이터는 덮어씀)');
-    if(useCloud) applyData(remote);
-    cloudReady=true;
-    if(!useCloud) cloudPush(); else setSync('ok');
+   const cloudAt=snap.data().updatedAt||0;
+   const useCloud=()=>{applyData(remote,cloudAt);cloudReady=true;setSync('ok');};
+   const useLocal=()=>{cloudReady=true;cloudPush();};
+   if(normData(remote)===normData(snapshotData())){
+    markSynced(cloudAt); cloudReady=true; setSync('ok');       // 내용이 같으면 조용히 넘어감
+   }else if(!hasData(remote)){
+    useLocal();                                                 // 클라우드가 비어 있으면 이 컴퓨터 내용 올림
+   }else if(!hasLocalData()||!syncMeta.dirty){
+    useCloud();                                                 // 이 컴퓨터에서 안 고쳤으면 클라우드 최신본 자동으로 불러옴
+    if(hasLocalData()) toast(`☁ 다른 곳에서 고친 최신 내용을 불러왔어요 (${fmtTime(cloudAt)})`);
+   }else if(cloudAt<=(syncMeta.syncedAt||0)){
+    useLocal();                                                 // 이 컴퓨터만 고쳤으면 자동으로 올림
+    toast('☁ 이 컴퓨터에서 고친 내용을 클라우드에 올렸어요');
    }else{
-    if(!same) applyData(remote);
-    cloudReady=true; setSync('ok');
+    // 양쪽 다 고쳤을 때만 물어봄
+    const cloudNewer=cloudAt>=(syncMeta.localAt||0);
+    const ok=confirm(`이 컴퓨터와 클라우드에서 각각 고친 내용이 있어요.\n\n· 클라우드: ${fmtTime(cloudAt)} 수정${cloudNewer?' (더 최근)':''}\n· 이 컴퓨터: ${fmtTime(syncMeta.localAt)} 수정${cloudNewer?'':' (더 최근)'}\n\n[확인] 클라우드 내용 불러오기 (이 컴퓨터 내용은 덮어씀)\n[취소] 이 컴퓨터 내용 올리기 (클라우드 내용은 덮어씀)`);
+    if(ok) useCloud(); else useLocal();
    }
   }else{
    cloudReady=true; cloudPush(); // 처음 로그인: 이 컴퓨터 데이터를 클라우드로 업로드
@@ -746,7 +772,7 @@ async function onAuth(user){
   fbUnsub=fbDoc.onSnapshot(doc=>{
    if(!doc.exists||doc.metadata.hasPendingWrites) return;
    const d=doc.data(); if(!d||d.clientId===CLIENT_ID||!d.data) return;
-   applyData(JSON.parse(d.data)); setSync('ok');
+   applyData(JSON.parse(d.data),d.updatedAt); setSync('ok');
   },e=>{console.error(e);setSync('error',e.message);});
  }catch(e){
   console.error(e);
