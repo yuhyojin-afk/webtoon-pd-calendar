@@ -83,7 +83,7 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
  </div>
 </div>
 <div class="field"><label>색상</label><input id="color" type="color" value="#d2e3fc"></div>
-<input id="editId" type="hidden"><div class="actions"><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" id="saveWorkBtn" onclick="saveWork()">추가</button></div>
+<input id="editId" type="hidden"><div class="actions"><button class="btn" id="exportFromModalBtn" onclick="exportFromModal()" style="margin-right:auto" title="작가님께 보낼 공유용 일정 링크 만들기 (저장된 일정 기준)">공유용 추출</button><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" id="saveWorkBtn" onclick="saveWork()">추가</button></div>
 </div></div>
 
 <div class="modal" id="exportModal">
@@ -172,6 +172,7 @@ function openModal(work=null){
  document.getElementById('editId').value=work?work.id:'';
  document.getElementById('modalTitle').textContent=work?'작품 설정 수정':'작품 추가';
  document.getElementById('saveWorkBtn').textContent=work?'저장':'추가';
+ document.getElementById('exportFromModalBtn').style.display=work?'':'none';
  document.getElementById('name').value=work?.name||'';
  document.getElementById('start').value=work?.start||'';
  document.getElementById('episode').value=work?.episode||1;
@@ -524,11 +525,10 @@ function renderWorks(){
  <div class="work">
   <span class="dot" style="background:${w.color}"></span>
   <label onclick="openModal(works.find(x=>x.id===${w.id}))" title="클릭하여 작품 설정 수정">
-   ${esc(w.name)} <span style="color:#777">(${w.cycle}주+${w.breakWeeks??1}주 휴재)</span>${w.author?.enabled?`<br><span style="color:#b45309;font-size:12px">✍ 작가 ${w.author.interval}일마다 마감${(w.author.changes||[]).map(c=>` → ${c.ep}화~ ${c.interval}일`).join('')}${w.author.endEpisode?` (~${w.author.endEpisode}화)`:''}</span>`:''}
+   ${esc(w.name)}<br><span style="color:#777;font-size:12px">${w.cycle}주+${w.breakWeeks??1}주 휴재</span>${w.author?.enabled?`<br><span style="color:#b45309;font-size:12px">✍ 작가 ${w.author.interval}일마다 마감${(w.author.changes||[]).map(c=>` → ${c.ep}화~ ${c.interval}일`).join('')}${w.author.endEpisode?` (~${w.author.endEpisode}화)`:''}</span>`:''}
   </label>
   <div class="work-actions">
    ${((w.shifts&&w.shifts.length)||(w.author?.shifts?.length))?`<button class="mini" onclick="resetShifts(${w.id})" title="밀린 일정 초기화">↺</button>`:''}
-   <button class="mini" onclick="openExport(${w.id})" title="작가님께 보낼 공유용 일정 링크 만들기">추출</button>
    <button class="mini" onclick="openModal(works.find(x=>x.id===${w.id}))" title="설정 수정">⚙</button>
    <button class="mini" onclick="duplicateWork(${w.id})" title="이 설정을 복사하여 새 작품 추가">⧉</button>
    <button class="del" onclick="delWork(${w.id})" title="삭제">×</button>
@@ -660,6 +660,7 @@ function openExport(id){
  document.getElementById('exportModal').classList.add('show');
  updateExport();
 }
+function exportFromModal(){const id=+document.getElementById('editId').value;if(!id)return;closeModal();openExport(id);}
 function closeExport(){document.getElementById('exportModal').classList.remove('show');}
 function b64url(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 function updateExport(){
@@ -673,7 +674,7 @@ function updateExport(){
   const endD=dateOnly(to+'-01'); const last=key(new Date(endD.getFullYear(),endD.getMonth()+1,0));
   const ev=exportEvents(w,from+'-01',last).filter(e=>sel[e[0]]).sort((x,y)=>x[2]<y[2]?-1:1);
   const n=t=>ev.filter(e=>e[0]===t).length;
-  const parts=[['a','작가 최종고','개'],['r','연재일','개'],['h','휴재','주'],['d','마감','개']].filter(([t])=>sel[t]).map(([t,l,u])=>`${l} ${n(t)}${u}`);
+  const parts=[['a','작가 최종고','개'],['r','연재일','개'],['h','휴재','주'],['d','마감','개']].filter(([t])=>sel[t]&&!(t==='h'&&!n(t))).map(([t,l,u])=>`${l} ${n(t)}${u}`);
   if(!ev.length){msg='<span style="color:#c5221f">이 기간에 선택한 일정이 없어요.</span>';}
   else{
    const base=ev[0][2], b=dateOnly(base);
