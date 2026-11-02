@@ -525,7 +525,7 @@ function renderWorks(){
  <div class="work">
   <span class="dot" style="background:${w.color}"></span>
   <label onclick="openModal(works.find(x=>x.id===${w.id}))" title="클릭하여 작품 설정 수정">
-   ${esc(w.name)}<br><span style="color:#777;font-size:12px">${w.cycle}주+${w.breakWeeks??1}주 휴재</span>${w.author?.enabled?`<br><span style="color:#b45309;font-size:12px">✍ 작가 ${w.author.interval}일마다 마감${(w.author.changes||[]).map(c=>` → ${c.ep}화~ ${c.interval}일`).join('')}${w.author.endEpisode?` (~${w.author.endEpisode}화)`:''}</span>`:''}
+   ${esc(w.name)}<br><span style="color:#777;font-size:12px">${w.cycle}주+${w.breakWeeks??1}주 휴재</span>
   </label>
   <div class="work-actions">
    ${((w.shifts&&w.shifts.length)||(w.author?.shifts?.length))?`<button class="mini" onclick="resetShifts(${w.id})" title="밀린 일정 초기화">↺</button>`:''}
