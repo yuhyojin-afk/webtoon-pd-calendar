@@ -86,6 +86,24 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <input id="editId" type="hidden"><div class="actions"><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" id="saveWorkBtn" onclick="saveWork()">추가</button></div>
 </div></div>
 
+<div class="modal" id="exportModal">
+<div class="box">
+<h2>작가님 공유용 추출</h2>
+<div class="dateHint">이 작품 일정만 담은 읽기 전용 링크를 만들어요. 작가님은 로그인 없이 링크만 열면 볼 수 있어요.</div>
+<div class="field"><label for="exName">공유용 작품명</label><input id="exName" oninput="updateExport()"></div>
+<div class="field"><label>기간</label><div style="display:flex;gap:8px;align-items:center"><input id="exFrom" type="month" onchange="updateExport()" style="flex:1;min-width:0"><span>~</span><input id="exTo" type="month" onchange="updateExport()" style="flex:1;min-width:0"></div></div>
+<div class="field"><label>포함할 일정</label>
+ <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px">
+  <label style="display:flex;align-items:center;gap:5px;margin:0;font-size:14px;color:#202124"><input id="exA" type="checkbox" checked onchange="updateExport()" style="width:auto">✍ 작가 최종고</label>
+  <label style="display:flex;align-items:center;gap:5px;margin:0;font-size:14px;color:#202124"><input id="exR" type="checkbox" checked onchange="updateExport()" style="width:auto">연재일</label>
+  <label style="display:flex;align-items:center;gap:5px;margin:0;font-size:14px;color:#202124"><input id="exH" type="checkbox" checked onchange="updateExport()" style="width:auto">휴재</label>
+  <label style="display:flex;align-items:center;gap:5px;margin:0;font-size:14px;color:#202124"><input id="exD" type="checkbox" onchange="updateExport()" style="width:auto">마감(플랫폼 전달)</label>
+ </div></div>
+<div class="dateHint" id="exCount" style="margin:0"></div>
+<div class="field"><label for="exLink">공유 링크</label><input id="exLink" readonly onclick="this.select()"></div>
+<div class="actions"><button class="btn" onclick="closeExport()">닫기</button><button class="btn" onclick="previewExport()">미리보기</button><button class="btn primary" onclick="copyExport()">링크 복사</button></div>
+</div></div>
+
 <div class="modal" id="moveModal">
 <div class="box">
 <h2 id="moveModalTitle">마감일 변경</h2>
@@ -510,6 +528,7 @@ function renderWorks(){
   </label>
   <div class="work-actions">
    ${((w.shifts&&w.shifts.length)||(w.author?.shifts?.length))?`<button class="mini" onclick="resetShifts(${w.id})" title="밀린 일정 초기화">↺</button>`:''}
+   <button class="mini" onclick="openExport(${w.id})" title="작가님께 보낼 공유용 일정 링크 만들기">추출</button>
    <button class="mini" onclick="openModal(works.find(x=>x.id===${w.id}))" title="설정 수정">⚙</button>
    <button class="mini" onclick="duplicateWork(${w.id})" title="이 설정을 복사하여 새 작품 추가">⧉</button>
    <button class="del" onclick="delWork(${w.id})" title="삭제">×</button>
@@ -594,6 +613,84 @@ function render(){
   cal.appendChild(cell);
  }
 }
+// ===== 작가님 공유용 추출 =====
+let exportId=null;
+function exportEvents(w,fromKey,toKey){
+ const ev=[], to=dateOnly(toKey), fin=w.finalEpisode||Infinity;
+ for(let i=0;i<5000;i++){
+  const s=episodeSchedule(w,i); if(s.ep>fin||s.release>to) break;
+  const ov=overrides[w.id+'_'+s.ep];
+  ev.push(['d',s.ep,key(ov?dateOnly(ov):s.deadline)]); ev.push(['r',s.ep,key(s.release)]);
+ }
+ const a=w.author;
+ if(a&&a.enabled&&a.start){
+  for(let i=0;i<5000;i++){
+   const s=authorSchedule(w,i); if(a.endEpisode&&s.ep>a.endEpisode) break; if(s.deadline>to) break;
+   const ov=overrides[w.id+'_a_'+s.ep]; ev.push(['a',s.ep,key(ov?dateOnly(ov):s.deadline)]);
+  }
+ }
+ for(let c=0;c<1000;c++){
+  const lastEp=w.episode+c*w.cycle+w.cycle-1;
+  if(w.finalEpisode&&lastEp>=w.finalEpisode) break;
+  const base=firstReleaseDate(w);
+  base.setDate(base.getDate()+c*(w.cycle+(w.breakWeeks??1))*7+w.cycle*7+shiftDaysFor(w,lastEp));
+  if(base>to) break;
+  for(let bw=0;bw<(w.breakWeeks??1);bw++){const d=new Date(base);d.setDate(base.getDate()+bw*7);ev.push(['h',null,key(d)]);}
+ }
+ return ev.filter(e=>e[2]>=fromKey&&e[2]<=toKey);
+}
+function exportDefaultEnd(w){
+ // 완결 회차 연재일 / 작가 마지막 회차 중 늦은 달. 작가 마감이 끝없이 이어지면 3개월 더 보여줌
+ let end=new Date(); end.setMonth(end.getMonth()+6);
+ const c=[];
+ if(w.finalEpisode) c.push(episodeSchedule(w,w.finalEpisode-w.episode).release);
+ const a=w.author;
+ if(a&&a.enabled&&a.start&&a.endEpisode&&a.endEpisode>=a.episode) c.push(authorSchedule(w,a.endEpisode-a.episode).deadline);
+ if(c.length){end=new Date(Math.max(...c));if(a&&a.enabled&&a.start&&!a.endEpisode){end.setMonth(end.getMonth()+3);}}
+ return key(end).slice(0,7);
+}
+function openExport(id){
+ const w=works.find(x=>x.id===id); if(!w) return;
+ exportId=id;
+ document.getElementById('exName').value=w.name;
+ document.getElementById('exFrom').value=key(new Date()).slice(0,7);
+ document.getElementById('exTo').value=exportDefaultEnd(w);
+ document.getElementById('exA').checked=!!(w.author&&w.author.enabled);
+ document.getElementById('exR').checked=true; document.getElementById('exH').checked=true; document.getElementById('exD').checked=false;
+ document.getElementById('exportModal').classList.add('show');
+ updateExport();
+}
+function closeExport(){document.getElementById('exportModal').classList.remove('show');}
+function b64url(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function updateExport(){
+ const w=works.find(x=>x.id===exportId); if(!w) return;
+ const g=id=>document.getElementById(id);
+ const from=g('exFrom').value, to=g('exTo').value, name=g('exName').value.trim()||w.name;
+ const sel={a:g('exA').checked,r:g('exR').checked,h:g('exH').checked,d:g('exD').checked};
+ let link='', msg='';
+ if(!from||!to||from>to){msg='<span style="color:#c5221f">기간을 확인해주세요. 시작 달이 끝 달보다 늦어요.</span>';}
+ else{
+  const endD=dateOnly(to+'-01'); const last=key(new Date(endD.getFullYear(),endD.getMonth()+1,0));
+  const ev=exportEvents(w,from+'-01',last).filter(e=>sel[e[0]]).sort((x,y)=>x[2]<y[2]?-1:1);
+  const n=t=>ev.filter(e=>e[0]===t).length;
+  const parts=[['a','작가 최종고','개'],['r','연재일','개'],['h','휴재','주'],['d','마감','개']].filter(([t])=>sel[t]).map(([t,l,u])=>`${l} ${n(t)}${u}`);
+  if(!ev.length){msg='<span style="color:#c5221f">이 기간에 선택한 일정이 없어요.</span>';}
+  else{
+   const base=ev[0][2], b=dateOnly(base);
+   const data={v:1,n:name,at:key(new Date()),b:base,e:ev.map(([t,ep,d])=>[t,ep,Math.round((dateOnly(d)-b)/864e5)])};
+   link=new URL('share.html',ONLINE_URL).href+'#d='+b64url(JSON.stringify(data));
+   msg=parts.join(' · ');
+  }
+ }
+ g('exCount').innerHTML=msg; g('exLink').value=link;
+}
+function copyExport(){
+ const el=document.getElementById('exLink'); if(!el.value) return;
+ const fallback=()=>{el.focus();el.select();toast('링크를 선택해 두었어요. Ctrl+C로 복사하세요');};
+ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(el.value).then(()=>toast('링크를 복사했어요. 작가님께 붙여넣어 보내세요')).catch(fallback);
+ else fallback();
+}
+function previewExport(){const v=document.getElementById('exLink').value;if(v)window.open(v,'_blank','noopener');}
 function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 render();
 </script>
