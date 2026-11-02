@@ -9,7 +9,15 @@
 .app{display:flex;height:100vh;min-width:1000px}.side{width:280px;border-right:1px solid #dadce0;padding:22px 18px;background:#fafafa}
 h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;border-radius:22px;padding:10px 17px;cursor:pointer;font-weight:600}.btn:hover{background:#f1f3f4}
 .section{margin-top:25px}.section h3{font-size:13px;color:#5f6368;margin:0 0 10px}.work{display:flex;align-items:center;gap:8px;padding:7px 4px;border-radius:7px}.work:hover{background:#eee}.dot{width:10px;height:10px;border-radius:50%;flex:none}.work label{flex:1;font-size:14px;cursor:pointer}.work-actions{display:flex;gap:2px}.mini{border:0;background:transparent;color:#777;cursor:pointer;font-size:13px;border-radius:5px;padding:3px 5px}.mini:hover{background:#e8eaed}.del{border:0;background:transparent;color:#777;cursor:pointer;font-size:16px}
-.main{flex:1;display:flex;flex-direction:column;min-width:0}.content{flex:1;display:flex;min-height:0}.calendarWrap{flex:1;min-width:0;display:flex;flex-direction:column}.notes{width:245px;border-left:1px solid #dadce0;background:#fafafa;padding:14px;overflow:auto}.noteCard{background:#fff;border:1px solid #dadce0;border-radius:8px;margin-bottom:10px;padding:10px}.noteTitle{font-size:13px;font-weight:600;margin-bottom:7px}.noteCard textarea{width:100%;height:72px;resize:vertical;border:1px solid #dadce0;border-radius:5px;padding:7px;font:12px Arial,"Noto Sans KR",sans-serif}.done{accent-color:#1a73e8}.top{height:68px;border-bottom:1px solid #dadce0;display:flex;align-items:center;padding:0 20px;gap:12px}.top .title{font-size:21px;font-weight:600;min-width:210px}.nav{display:flex;gap:4px}.nav button{border:0;background:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px}.nav button:hover{background:#f1f3f4}.today{border:1px solid #dadce0;background:#fff;border-radius:5px;padding:8px 13px;cursor:pointer}.toggle{border:1px solid #dadce0;background:#fff;border-radius:18px;padding:8px 13px;cursor:pointer}.toggle.active{background:#e8f0fe;color:#1967d2;border-color:#aecbfa}.grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:38px repeat(6,1fr);min-height:0}.dow{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;text-align:center;padding:10px;font-size:12px;color:#5f6368}.cell{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;padding:5px;overflow:auto}.cell.dragover{background:#e8f0fe}.event.dragging{opacity:.4}.event[draggable="true"]{cursor:grab}.num{font-size:12px;color:#5f6368;margin:2px 4px 5px}.num.today{background:#1a73e8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;padding:5px 0;margin:0 0 4px 2px}.event{font-size:11px;border-radius:4px;padding:4px 6px;margin:2px 0;line-height:1.25;color:#202124;white-space:nowrap;overflow:hidden}.event .small{font-size:10px;color:#555}.empty{background:#f8f9fa}.legend{font-size:11px;color:#666;margin-top:12px;line-height:1.5}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}.content{flex:1;display:flex;min-height:0}.calendarWrap{flex:1;min-width:0;display:flex;flex-direction:column}.notes{width:245px;border-left:1px solid #dadce0;background:#fafafa;padding:14px;overflow:auto}.noteCard{background:#fff;border:1px solid #dadce0;border-radius:8px;margin-bottom:10px;padding:10px}.noteTitle{font-size:13px;font-weight:600;margin-bottom:7px}.noteCard textarea{width:100%;height:72px;resize:vertical;border:1px solid #dadce0;border-radius:5px;padding:7px;font:12px Arial,"Noto Sans KR",sans-serif}.done{accent-color:#1a73e8}.top{height:68px;border-bottom:1px solid #dadce0;display:flex;align-items:center;padding:0 20px;gap:12px}.top .title{font-size:21px;font-weight:600;min-width:210px}.nav{display:flex;gap:4px}.nav button{border:0;background:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px}.nav button:hover{background:#f1f3f4}.today{border:1px solid #dadce0;background:#fff;border-radius:5px;padding:8px 13px;cursor:pointer}.toggle{border:1px solid #dadce0;background:#fff;border-radius:18px;padding:8px 13px;cursor:pointer}.toggle.active{background:#e8f0fe;color:#1967d2;border-color:#aecbfa}.grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:38px repeat(6,1fr);min-height:0}.dow{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;text-align:center;padding:10px;font-size:12px;color:#5f6368}.cell{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;padding:5px;overflow:auto;position:relative;cursor:pointer}
+.cell.hasNote::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-top:11px solid #f9ab00;border-left:11px solid transparent;pointer-events:none}
+.cell.noteOpen{box-shadow:inset 0 0 0 2px #1a73e8}
+.notePop{display:none;position:fixed;z-index:60;width:250px;background:#fff;border:1px solid #dadce0;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);padding:10px}.notePop.show{display:block}
+.notePop .t{font-size:12px;font-weight:600;color:#5f6368;margin-bottom:6px}
+.notePop textarea{width:100%;min-height:84px;border:1px solid #1a73e8;border-radius:4px;padding:8px;font:inherit;font-size:13px;resize:vertical;outline:none}
+.notePop .r{display:flex;gap:6px;justify-content:flex-end;align-items:center;margin-top:8px}.notePop .r button{border:1px solid #dadce0;background:#fff;border-radius:16px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer}.notePop .r .p{background:#1a73e8;border-color:#1a73e8;color:#fff}.notePop .r .x{color:#c5221f;margin-right:auto}
+.notePop .h{font-size:11px;color:#9aa0a6;margin-top:6px}
+.notePeek{display:none;position:fixed;z-index:55;max-width:240px;background:#fffbe6;border:1px solid #f4d06f;border-radius:6px;box-shadow:0 3px 10px rgba(0,0,0,.12);padding:8px 10px;font-size:13px;color:#3c3c3c;white-space:pre-wrap;word-break:break-word;pointer-events:none}.cell.dragover{background:#e8f0fe}.event.dragging{opacity:.4}.event[draggable="true"]{cursor:grab}.num{font-size:12px;color:#5f6368;margin:2px 4px 5px}.num.today{background:#1a73e8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;padding:5px 0;margin:0 0 4px 2px}.event{font-size:11px;border-radius:4px;padding:4px 6px;margin:2px 0;line-height:1.25;color:#202124;white-space:nowrap;overflow:hidden}.event .small{font-size:10px;color:#555}.empty{background:#f8f9fa}.legend{font-size:11px;color:#666;margin-top:12px;line-height:1.5}
 .dateHint{font-size:13px;color:#5f6368;margin-bottom:14px;line-height:1.6}.dateHint b{color:#202124}.checkRow{display:flex;align-items:flex-start;gap:8px;margin:14px 0;padding:10px;background:#f8f9fa;border-radius:8px}.checkRow input{margin-top:3px}.checkRow .ct{font-size:13px;line-height:1.5}.checkRow .ct small{color:#5f6368;display:block;margin-top:2px}
 .authorBox{margin-top:16px;padding:12px;border:1px solid #f4c7a1;background:#fff8f1;border-radius:10px}.authorBox h4{margin:0;font-size:14px;color:#b45309}.authorBox .field label{color:#8a5a2b}.authorHead{display:flex;align-items:center;gap:8px}.authorHead input{width:auto}.event.author{background:#fff!important;border:1.5px dashed #e8710a}
 .chRow{display:flex;gap:6px;align-items:center;margin:4px 0;font-size:13px}.chRow input{width:70px!important;padding:7px!important}
@@ -26,7 +34,7 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <h1>📅 작품 마감 캘린더</h1>
 <button class="btn" onclick="openModal()">＋ 작품 추가</button>
 <div class="section"><h3>작품</h3><div id="works"></div></div>
-<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br>"날짜 메모 보기"를 켜면 날짜 숫자를 클릭해 그날 메모를 남길 수 있습니다. 끄면 메모는 저장된 채로 화면에서만 숨겨집니다.</div></details>
+<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br><b>날짜 칸의 빈 곳을 클릭</b>하면 그날 메모를 남길 수 있습니다. 메모가 있는 날은 칸 오른쪽 위 모서리에 노란 삼각형이 표시되고, 마우스를 올리면 내용이 보입니다. 내용을 지우고 저장하면 메모가 삭제됩니다.</div></details>
 </aside>
 <main class="main">
 <div class="top">
@@ -34,7 +42,6 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <button class="today" onclick="goToday()">오늘</button>
 <button class="toggle" id="releaseToggle" onclick="toggleRelease()">연재일 보기</button>
 <button class="toggle active" id="authorToggle" onclick="toggleAuthor()">작가 마감 숨기기</button>
-<button class="toggle" id="dateNoteToggle" onclick="toggleDateNotes()">날짜 메모 보기</button>
 <div class="fWrap" id="fWrap"><button class="toggle" id="workFilterBtn" onclick="toggleFilterPop(event)">☰ 작품명 ▾</button>
 <div class="fPop" id="workFilterPop" onclick="event.stopPropagation()">
  <div class="fHead">작품명 <b>값을 포함하는 데이터</b></div>
@@ -117,6 +124,14 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 </div>
 <div class="actions"><button class="btn" onclick="closeMoveModal()">취소</button><button class="btn primary" onclick="confirmMove()">적용</button></div>
 </div></div>
+
+<div class="notePop" id="notePop" role="dialog" aria-label="날짜 메모">
+ <div class="t" id="notePopTitle">메모</div>
+ <textarea id="notePopText" placeholder="여기에 메모 입력"></textarea>
+ <div class="r"><button type="button" class="x" id="notePopDel" onclick="deleteNotePop()">삭제</button><button type="button" onclick="closeNotePop(false)">취소</button><button type="button" class="p" onclick="closeNotePop(true)">저장</button></div>
+ <div class="h">Ctrl+Enter 저장 · Esc 취소</div>
+</div>
+<div class="notePeek" id="notePeek"></div>
 
 <div class="modal" id="dateNoteModal">
 <div class="box">
@@ -359,6 +374,47 @@ function openDateNoteModal(dateKey){
  document.getElementById('dateNoteDelBtn').style.display=dateNotes[dateKey]?'':'none';
  document.getElementById('dateNoteModal').classList.add('show');
 }
+let notePopKey=null;
+function openNotePop(k,cell){
+ const pop=document.getElementById('notePop'), ta=document.getElementById('notePopText');
+ if(notePopKey===k){document.getElementById('notePopText').focus();return;}
+ if(notePopKey) closeNotePop(true,true);
+ notePopKey=k; hideNotePeek();
+ document.querySelectorAll('.cell.noteOpen').forEach(c=>c.classList.remove('noteOpen')); cell.classList.add('noteOpen');
+ const d=dateOnly(k);
+ document.getElementById('notePopTitle').textContent=`${d.getMonth()+1}월 ${d.getDate()}일 (${'일월화수목금토'[d.getDay()]}) 메모`;
+ ta.value=dateNotes[k]||'';
+ document.getElementById('notePopDel').style.visibility=dateNotes[k]?'visible':'hidden';
+ pop.classList.add('show');
+ const r=cell.getBoundingClientRect(), w=pop.offsetWidth, h=pop.offsetHeight;
+ let left=r.right-6; if(left+w>innerWidth-8) left=r.left-w+6; if(left<8) left=8;
+ let top=r.top; if(top+h>innerHeight-8) top=Math.max(8,innerHeight-h-8);
+ pop.style.left=left+'px'; pop.style.top=top+'px';
+ ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length);
+}
+function closeNotePop(save,noRender){
+ if(!notePopKey) return;
+ const k=notePopKey, v=document.getElementById('notePopText').value.trim();
+ notePopKey=null;
+ document.getElementById('notePop').classList.remove('show');
+ document.querySelectorAll('.cell.noteOpen').forEach(c=>c.classList.remove('noteOpen'));
+ if(save&&v!==(dateNotes[k]||'')){ if(v) dateNotes[k]=v; else delete dateNotes[k]; saveDateNotes(); if(!noRender) render(); }
+}
+function deleteNotePop(){if(!notePopKey)return;document.getElementById('notePopText').value='';closeNotePop(true);}
+function showNotePeek(cell,k){
+ if(notePopKey||!dateNotes[k]) return;
+ const p=document.getElementById('notePeek'); p.textContent=dateNotes[k]; p.style.display='block';
+ const r=cell.getBoundingClientRect(); let left=r.right+4; if(left+p.offsetWidth>innerWidth-8) left=r.left-p.offsetWidth-4;
+ p.style.left=Math.max(8,left)+'px'; p.style.top=Math.max(8,Math.min(r.top,innerHeight-p.offsetHeight-8))+'px';
+}
+function hideNotePeek(){const p=document.getElementById('notePeek');if(p)p.style.display='none';}
+document.addEventListener('mousedown',e=>{if(notePopKey&&!e.target.closest('#notePop')&&!e.target.closest('.cell.noteOpen'))closeNotePop(true);});
+document.addEventListener('keydown',e=>{
+ if(!notePopKey) return;
+ if(e.key==='Escape'){e.preventDefault();closeNotePop(false);}
+ else if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();closeNotePop(true);}
+});
+window.addEventListener('scroll',hideNotePeek,true);
 function closeDateNoteModal(){document.getElementById('dateNoteModal').classList.remove('show');dateNoteContext=null;}
 function saveDateNote(){
  if(!dateNoteContext)return;
@@ -564,20 +620,14 @@ function render(){
   let n=document.createElement('div');n.className='num';
   if(key(d)===key(new Date()))n.className+=' today';
   n.textContent=d.getDate();cell.appendChild(n);
-  if(showDateNotes){
-    n.style.cursor='pointer';
-    n.title='클릭해서 이 날짜에 메모를 추가/수정하세요';
-    n.onclick=()=>openDateNoteModal(cellKey);
-    if(dateNotes[cellKey]){
-      let noteEl=document.createElement('div');
-      noteEl.className='event';
-      noteEl.style.cssText='background:#fef7e0;color:#5f4300;cursor:pointer;white-space:normal;word-break:break-word';
-      noteEl.textContent='📝 '+dateNotes[cellKey];
-      noteEl.title='클릭해서 메모 수정';
-      noteEl.onclick=()=>openDateNoteModal(cellKey);
-      cell.appendChild(noteEl);
-    }
+  // 날짜 메모: 칸의 빈 곳을 클릭하면 메모 입력창, 메모가 있으면 모서리에 표시(구글 시트 메모처럼)
+  if(notePopKey===cellKey) cell.classList.add('noteOpen');
+  if(dateNotes[cellKey]){
+    cell.classList.add('hasNote');
+    cell.onmouseenter=()=>showNotePeek(cell,cellKey);
+    cell.onmouseleave=hideNotePeek;
   }
+  cell.onclick=(e)=>{if(e.target.closest('.event,input,button,a,textarea,select'))return;openNotePop(cellKey,cell);};
   (dateMap[key(d)]||[]).forEach(item=>{
     // Default: only deadlines. Release events are visible only when toggled.
     if(item.type==='마감'){
