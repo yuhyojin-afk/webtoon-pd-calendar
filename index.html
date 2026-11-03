@@ -712,6 +712,22 @@ function openExport(id){
 }
 function exportFromModal(){const id=+document.getElementById('editId').value;if(!id)return;closeModal();openExport(id);}
 function closeExport(){document.getElementById('exportModal').classList.remove('show');}
+// 짧은 공유 코드: 2.작성일.기준일.그룹수.그룹들.작품명  (날짜=2020-01-01부터 일수, 36진수)
+// 그룹 = 종류+시작회차_첫날짜차이+날짜간격들 (회차가 1씩 이어질 때만 사용, 아니면 긴 형식으로)
+function shortShareCode(data){
+ const D0=Date.UTC(2020,0,1), day=k=>{const [y,m,d]=k.split('-').map(Number);return Math.round((Date.UTC(y,m-1,d)-D0)/864e5);};
+ const n36=v=>{const a=Math.abs(v),sg=v<0?'-':'';return sg+(a<36?a.toString(36):a<1296?'~'+a.toString(36).padStart(2,'0'):'!'+a.toString(36).padStart(4,'0'));};
+ const groups=[];
+ for(const t of ['a','r','h','d']){
+  const ev=data.e.filter(e=>e[0]===t); if(!ev.length) continue;
+  if(t!=='h') ev.sort((x,y)=>x[1]-y[1]); else ev.sort((x,y)=>x[2]-y[2]);
+  if(t!=='h'&&ev.some((e,i)=>i&&e[1]!==ev[i-1][1]+1)) return null;
+  let g=t+(t==='h'?'':ev[0][1])+'_'+n36(ev[0][2]);
+  for(let i=1;i<ev.length;i++) g+=n36(ev[i][2]-ev[i-1][2]);
+  groups.push(g);
+ }
+ return ['2',day(data.at).toString(36),day(data.b).toString(36),groups.length,...groups].join('.')+'.'+encodeURIComponent(data.n);
+}
 function b64url(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 function updateExport(){
  const w=works.find(x=>x.id===exportId); if(!w) return;
@@ -729,19 +745,43 @@ function updateExport(){
   else{
    const base=ev[0][2], b=dateOnly(base);
    const data={v:1,n:name,at:key(new Date()),b:base,e:ev.map(([t,ep,d])=>[t,ep,Math.round((dateOnly(d)-b)/864e5)])};
-   link=new URL('share.html',ONLINE_URL).href+'#d='+b64url(JSON.stringify(data));
+   const short=shortShareCode(data);
+   link=new URL('share.html',ONLINE_URL).href+(short?'#s='+short:'#d='+b64url(JSON.stringify(data)));
+   exportJson=JSON.stringify(data); exportLong=link;
+   if(shortCache[exportJson]) link=shortCache[exportJson];
    msg=parts.join(' · ');
+   if(!shortCache[exportJson]&&fbUser) msg+='<br><span style="color:#5f6368">링크 복사를 누르면 짧은 링크로 바뀌어요</span>';
   }
  }
  g('exCount').innerHTML=msg; g('exLink').value=link;
 }
-function copyExport(){
+// 짧은 링크: 로그인 상태면 공유용 일정을 Firebase(shares/번호)에 저장하고 …/s#번호 링크를 만듦
+let exportJson='', exportLong='', shortCache={};
+async function ensureShortLink(){
+ if(!exportJson) return '';
+ if(shortCache[exportJson]) return shortCache[exportJson];
+ if(!fbUser||typeof firebase==='undefined') return exportLong;
+ const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+ const id=Array.from(crypto.getRandomValues(new Uint8Array(7)),b=>chars[b%chars.length]).join('');
+ try{
+  await firebase.firestore().collection('shares').doc(id).set({data:exportJson,owner:fbUser.uid,createdAt:Date.now()});
+  const link=new URL('s',ONLINE_URL).href+'#'+id;
+  shortCache[exportJson]=link; return link;
+ }catch(e){console.error(e);toast('짧은 링크를 만들지 못해 긴 링크를 사용해요');return exportLong;}
+}
+async function copyExport(){
  const el=document.getElementById('exLink'); if(!el.value) return;
+ const link=await ensureShortLink(); if(link) el.value=link;
  const fallback=()=>{el.focus();el.select();toast('링크를 선택해 두었어요. Ctrl+C로 복사하세요');};
  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(el.value).then(()=>toast('링크를 복사했어요. 작가님께 붙여넣어 보내세요')).catch(fallback);
  else fallback();
 }
-function previewExport(){const v=document.getElementById('exLink').value;if(v)window.open(v,'_blank','noopener');}
+async function previewExport(){
+ if(!document.getElementById('exLink').value) return;
+ const w=window.open('about:blank','_blank');
+ const link=await ensureShortLink(); document.getElementById('exLink').value=link;
+ if(w) w.location.href=link; else window.open(link,'_blank');
+}
 function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 render();
 </script>
