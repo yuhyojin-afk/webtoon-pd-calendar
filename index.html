@@ -35,7 +35,7 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <h1>📅 작품 마감 캘린더</h1>
 <button class="btn" onclick="openModal()">＋ 작품 추가</button> <button class="btn" onclick="openEventModal(null,key(new Date()))" title="런칭일, 표지 작업, 회의처럼 직접 넣는 일정">＋ 일정 추가</button>
 <div class="section"><h3>작품</h3><div id="works"></div></div>
-<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br><b>날짜 칸의 빈 곳을 클릭</b>하면 그날 메모를 남길 수 있습니다. 메모가 있는 날은 칸 오른쪽 위 모서리에 노란 삼각형이 표시되고, 마우스를 올리면 내용이 보입니다. 내용을 지우고 저장하면 메모가 삭제됩니다.<br><br><b>＋ 일정 추가</b>(또는 날짜 메모 창의 ＋ 일정)로 런칭·표지 작업·회의 같은 일정을 직접 넣을 수 있습니다. 작품을 고르면 작품 색으로, 고르지 않으면 보라색 개인 일정으로 표시됩니다. 일마다/주마다/매월 반복도 가능하고, 일정을 클릭하면 수정·삭제할 수 있습니다. 작품 일정은 공유용 추출에서 골라서 작가님께 함께 보낼 수 있습니다.</div></details>
+<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br><b>날짜 칸의 빈 곳을 클릭</b>하면 그 날짜로 일정 추가 창이 열립니다. 창 왼쪽 아래 <b>날짜 메모</b>를 누르면 그날 메모를 남길 수 있습니다. 메모가 있는 날은 칸 오른쪽 위 모서리에 노란 삼각형이 표시되고, 마우스를 올리면 내용이 보입니다. 내용을 지우고 저장하면 메모가 삭제됩니다.<br><br><b>＋ 일정 추가</b>(또는 날짜 칸의 빈 곳 클릭)으로 런칭·표지 작업·회의 같은 일정을 직접 넣을 수 있습니다. 작품을 고르면 작품 색으로, 고르지 않으면 보라색 개인 일정으로 표시됩니다. 일마다/주마다/매월 반복도 가능하고, 일정을 클릭하면 수정·삭제할 수 있습니다. 작품 일정은 공유용 추출에서 골라서 작가님께 함께 보낼 수 있습니다.</div></details>
 </aside>
 <main class="main">
 <div class="top">
@@ -154,7 +154,7 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
  </div></div>
 <div class="dateHint" id="evPreview" style="margin:0"></div>
 <input id="evId" type="hidden">
-<div class="actions"><button class="btn" id="evDelBtn" onclick="deleteEvent()" style="color:#c5221f;margin-right:auto">삭제</button><button class="btn" onclick="closeEventModal()">취소</button><button class="btn primary" onclick="saveEvent()">저장</button></div>
+<div class="actions"><span style="display:flex;gap:8px;margin-right:auto"><button class="btn" id="evMemoBtn" onclick="memoFromEventModal()" title="이 날짜에 메모 남기기">날짜 메모</button><button class="btn" id="evDelBtn" onclick="deleteEvent()" style="color:#c5221f">삭제</button></span><button class="btn" onclick="closeEventModal()">취소</button><button class="btn primary" onclick="saveEvent()">저장</button></div>
 </div></div>
 
 <div class="modal" id="dateNoteModal">
@@ -652,8 +652,11 @@ function renderWorks(){
  </div>`).join('');
 }
 function toggleEvDone(k){if(completed[k])delete completed[k];else completed[k]=true;saveCompleted();render();}
+let evCtxDate=null;
 function openEventModal(id,dateKey){
  const ev=id?events[id]:null, g=x=>document.getElementById(x);
+ evCtxDate=dateKey||(ev?ev.date:key(new Date()));
+ g('evMemoBtn').textContent=dateNotes[evCtxDate]?'날짜 메모 (있음)':'날짜 메모';
  g('eventModalTitle').textContent=ev?'일정 수정':'일정 추가';
  g('evId').value=ev?ev.id:'';
  g('evTitle').value=ev?ev.title:'';
@@ -699,6 +702,12 @@ function deleteEvent(){
  if(!confirm(`'${events[id].title}' 일정을 삭제할까요?${events[id].repeat&&events[id].repeat.type!=='none'?' (반복 일정 전체가 삭제돼요)':''}`)) return;
  delete events[id]; saveEvents(); closeEventModal(); render();
 }
+// 일정 창에서 '날짜 메모'를 누르면 그 날짜 칸에 메모 입력창을 띄움
+function memoFromEventModal(){
+ const k=evCtxDate; closeEventModal(); if(!k) return;
+ const d=dateOnly(k); if(d.getFullYear()!==view.getFullYear()||d.getMonth()!==view.getMonth()){view=new Date(d.getFullYear(),d.getMonth(),1);render();}
+ const cell=document.querySelector(`#calendar .cell[data-key="${k}"]`); if(cell) openNotePop(k,cell);
+}
 function addEventFromNotePop(){const k=notePopKey; closeNotePop(true); openEventModal(null,k);}
 ['evDate','evEvery','evCount','evUntil'].forEach(id=>document.addEventListener('input',e=>{if(e.target&&e.target.id===id)toggleEvRepeat();}));
 function toggleDone(workId,ep){const k=workId+'_'+ep;if(completed[k])delete completed[k];else completed[k]=true;saveCompleted();render();}
@@ -737,7 +746,9 @@ function render(){
     cell.onmouseenter=()=>showNotePeek(cell,cellKey);
     cell.onmouseleave=hideNotePeek;
   }
-  cell.onclick=(e)=>{if(e.target.closest('.event,input,button,a,textarea,select'))return;openNotePop(cellKey,cell);};
+  cell.dataset.key=cellKey;
+  // 빈 곳 클릭 = 일정 추가 (날짜 메모는 일정 창의 '날짜 메모' 버튼으로)
+  cell.onclick=(e)=>{if(e.target.closest('.event,input,button,a,textarea,select'))return;openEventModal(null,cellKey);};
   (dateMap[key(d)]||[]).forEach(item=>{
     // Default: only deadlines. Release events are visible only when toggled.
     if(item.type==='마감'){
@@ -771,7 +782,7 @@ function render(){
       ev.title='클릭해서 일정 수정';
       const rl=repeatLabel(item.ev.repeat);
       ev.innerHTML=`<div><input class="done" type="checkbox" ${ck?'checked':''} onclick="event.stopPropagation();toggleEvDone('${ckKey}')"> <b style="${ck?'text-decoration:line-through;opacity:.55':''}">${esc(item.ev.title)}</b><br><span class="small">${item.w?esc(item.w.name):'개인 일정'}${rl?' · '+rl:''}</span></div>`;
-      ev.onclick=(e)=>{if(e.target.tagName!=='INPUT') openEventModal(item.ev.id)};
+      ev.onclick=(e)=>{if(e.target.tagName!=='INPUT') openEventModal(item.ev.id,item.date)};
       cell.appendChild(ev);
     } else if(showRelease && item.type==='휴재'){
       let ev=document.createElement('div');ev.className='event';ev.style.background='#f8f9fa';ev.style.color='#5f6368';
