@@ -12,6 +12,7 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 .main{flex:1;display:flex;flex-direction:column;min-width:0}.content{flex:1;display:flex;min-height:0}.calendarWrap{flex:1;min-width:0;display:flex;flex-direction:column}.notes{width:245px;border-left:1px solid #dadce0;background:#fafafa;padding:14px;overflow:auto}.noteCard{background:#fff;border:1px solid #dadce0;border-radius:8px;margin-bottom:10px;padding:10px}.noteTitle{font-size:13px;font-weight:600;margin-bottom:7px}.noteCard textarea{width:100%;height:72px;resize:vertical;border:1px solid #dadce0;border-radius:5px;padding:7px;font:12px Arial,"Noto Sans KR",sans-serif}.done{accent-color:#1a73e8}.top{height:68px;border-bottom:1px solid #dadce0;display:flex;align-items:center;padding:0 20px;gap:12px}.top .title{font-size:21px;font-weight:600;min-width:210px}.nav{display:flex;gap:4px}.nav button{border:0;background:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px}.nav button:hover{background:#f1f3f4}.today{border:1px solid #dadce0;background:#fff;border-radius:5px;padding:8px 13px;cursor:pointer}.toggle{border:1px solid #dadce0;background:#fff;border-radius:18px;padding:8px 13px;cursor:pointer}.toggle.active{background:#e8f0fe;color:#1967d2;border-color:#aecbfa}.grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:38px repeat(6,1fr);min-height:0}.dow{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;text-align:center;padding:10px;font-size:12px;color:#5f6368}.cell{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;padding:5px;overflow:auto;position:relative;cursor:pointer}
 .cell.hasNote::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-top:11px solid #f9ab00;border-left:11px solid transparent;pointer-events:none}
 .cell.noteOpen{box-shadow:inset 0 0 0 2px #1a73e8}
+.event.custom{border:1px solid rgba(0,0,0,.08);cursor:pointer}.event.custom.personal{background:#efe9f8;border-left:5px solid #7e57c2}
 .notePop{display:none;position:fixed;z-index:60;width:250px;background:#fff;border:1px solid #dadce0;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);padding:10px}.notePop.show{display:block}
 .notePop .t{font-size:12px;font-weight:600;color:#5f6368;margin-bottom:6px}
 .notePop textarea{width:100%;min-height:84px;border:1px solid #1a73e8;border-radius:4px;padding:8px;font:inherit;font-size:13px;resize:vertical;outline:none}
@@ -32,9 +33,9 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <div class="app">
 <aside class="side">
 <h1>📅 작품 마감 캘린더</h1>
-<button class="btn" onclick="openModal()">＋ 작품 추가</button>
+<button class="btn" onclick="openModal()">＋ 작품 추가</button> <button class="btn" onclick="openEventModal(null,key(new Date()))" title="런칭일, 표지 작업, 회의처럼 직접 넣는 일정">＋ 일정 추가</button>
 <div class="section"><h3>작품</h3><div id="works"></div></div>
-<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br><b>날짜 칸의 빈 곳을 클릭</b>하면 그날 메모를 남길 수 있습니다. 메모가 있는 날은 칸 오른쪽 위 모서리에 노란 삼각형이 표시되고, 마우스를 올리면 내용이 보입니다. 내용을 지우고 저장하면 메모가 삭제됩니다.</div></details>
+<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br><b>날짜 칸의 빈 곳을 클릭</b>하면 그날 메모를 남길 수 있습니다. 메모가 있는 날은 칸 오른쪽 위 모서리에 노란 삼각형이 표시되고, 마우스를 올리면 내용이 보입니다. 내용을 지우고 저장하면 메모가 삭제됩니다.<br><br><b>＋ 일정 추가</b>(또는 날짜 메모 창의 ＋ 일정)로 런칭·표지 작업·회의 같은 일정을 직접 넣을 수 있습니다. 작품을 고르면 작품 색으로, 고르지 않으면 보라색 개인 일정으로 표시됩니다. 일마다/주마다/매월 반복도 가능하고, 일정을 클릭하면 수정·삭제할 수 있습니다. 작품 일정은 공유용 추출에서 골라서 작가님께 함께 보낼 수 있습니다.</div></details>
 </aside>
 <main class="main">
 <div class="top">
@@ -106,6 +107,7 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
   <label style="display:flex;align-items:center;gap:5px;margin:0;font-size:14px;color:#202124"><input id="exH" type="checkbox" checked onchange="updateExport()" style="width:auto">휴재</label>
   <label style="display:flex;align-items:center;gap:5px;margin:0;font-size:14px;color:#202124"><input id="exD" type="checkbox" onchange="updateExport()" style="width:auto">마감(플랫폼 전달)</label>
  </div></div>
+<div class="field" id="exCustomBox"></div>
 <div class="dateHint" id="exCount" style="margin:0"></div>
 <div class="field"><label for="exLink">공유 링크</label><input id="exLink" readonly onclick="this.select()"></div>
 <div class="actions"><button class="btn" onclick="closeExport()">닫기</button><button class="btn" onclick="previewExport()">미리보기</button><button class="btn primary" onclick="copyExport()">링크 복사</button></div>
@@ -128,10 +130,32 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <div class="notePop" id="notePop" role="dialog" aria-label="날짜 메모">
  <div class="t" id="notePopTitle">메모</div>
  <textarea id="notePopText" placeholder="여기에 메모 입력"></textarea>
- <div class="r"><button type="button" class="x" id="notePopDel" onclick="deleteNotePop()">삭제</button><button type="button" onclick="closeNotePop(false)">취소</button><button type="button" class="p" onclick="closeNotePop(true)">저장</button></div>
+ <div class="r"><button type="button" onclick="addEventFromNotePop()" title="이 날짜에 일정 추가">＋ 일정</button><button type="button" class="x" id="notePopDel" onclick="deleteNotePop()">삭제</button><button type="button" onclick="closeNotePop(false)">취소</button><button type="button" class="p" onclick="closeNotePop(true)">저장</button></div>
  <div class="h">Ctrl+Enter 저장 · Esc 취소</div>
 </div>
 <div class="notePeek" id="notePeek"></div>
+
+<div class="modal" id="eventModal">
+<div class="box">
+<h2 id="eventModalTitle">일정 추가</h2>
+<div class="field"><label for="evTitle">일정 이름</label><input id="evTitle" placeholder="예: 런칭, 표지 작업, 내부 회의"></div>
+<div class="field"><label for="evDate">날짜 (반복이면 첫 날짜)</label><input id="evDate" type="date"></div>
+<div class="field"><label for="evWork">어디 일정인가요?</label><select id="evWork"></select></div>
+<div class="field"><label for="evRepeat">반복</label>
+ <div style="display:flex;gap:8px;align-items:center">
+  <select id="evRepeat" onchange="toggleEvRepeat()" style="flex:1"><option value="none">반복 안 함</option><option value="day">일마다</option><option value="week">주마다</option><option value="month">매월(같은 날짜)</option></select>
+  <span id="evEveryWrap" style="display:flex;gap:6px;align-items:center;flex:1"><input id="evEvery" type="number" min="1" value="1" style="width:70px"><span id="evEveryUnit">일마다</span></span>
+ </div></div>
+<div class="field" id="evEndWrap"><label for="evEnd">반복 끝</label>
+ <div style="display:flex;gap:8px;align-items:center">
+  <select id="evEnd" onchange="toggleEvRepeat()" style="flex:1"><option value="none">계속 반복</option><option value="count">횟수 정하기</option><option value="until">끝나는 날짜</option></select>
+  <input id="evCount" type="number" min="1" value="5" style="width:80px"><span id="evCountUnit">회</span>
+  <input id="evUntil" type="date" style="flex:1">
+ </div></div>
+<div class="dateHint" id="evPreview" style="margin:0"></div>
+<input id="evId" type="hidden">
+<div class="actions"><button class="btn" id="evDelBtn" onclick="deleteEvent()" style="color:#c5221f;margin-right:auto">삭제</button><button class="btn" onclick="closeEventModal()">취소</button><button class="btn primary" onclick="saveEvent()">저장</button></div>
+</div></div>
 
 <div class="modal" id="dateNoteModal">
 <div class="box">
@@ -358,6 +382,9 @@ const dateNotes=JSON.parse(localStorage.getItem('workCalendarDateNotesV1')||'{}'
 function saveOverrides(){localStorage.setItem('workCalendarOverridesV1',JSON.stringify(overrides));if(window.cloudPush)cloudPush();}
 function saveCompleted(){localStorage.setItem('workCalendarCompletedV1',JSON.stringify(completed));if(window.cloudPush)cloudPush();}
 function saveNotes(){localStorage.setItem('workCalendarNotesV1',JSON.stringify(notes));if(window.cloudPush)cloudPush();}
+// 직접 넣는 일정(작품 일정/개인 일정): {id:{id,title,date,workId|null,repeat:{type,every,end,count,until}}}
+const events=JSON.parse(localStorage.getItem('workCalendarEventsV1')||'{}');
+function saveEvents(){localStorage.setItem('workCalendarEventsV1',JSON.stringify(events));if(window.cloudPush)cloudPush();}
 function saveDateNotes(){localStorage.setItem('workCalendarDateNotesV1',JSON.stringify(dateNotes));if(window.cloudPush)cloudPush();}
 function toggleDateNotes(){
  showDateNotes=!showDateNotes;
@@ -471,6 +498,30 @@ function authorSchedule(w, i){
  d.setDate(d.getDate()+off+sh);
  return {ep, release:d, deadline:new Date(d)};
 }
+// 반복 일정의 날짜 목록 (fromKey~toKey 사이)
+function eventOccurrences(ev,fromKey,toKey){
+ const out=[], r=ev.repeat||{type:'none'}, start=dateOnly(ev.date), every=Math.max(1,+r.every||1);
+ for(let i=0;i<3000;i++){
+  let d;
+  if(r.type==='day') d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i*every);
+  else if(r.type==='week') d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i*every*7);
+  else if(r.type==='month'){const m=new Date(start.getFullYear(),start.getMonth()+i*every,1);d=new Date(m.getFullYear(),m.getMonth(),Math.min(start.getDate(),new Date(m.getFullYear(),m.getMonth()+1,0).getDate()));}
+  else d=start;
+  const k=key(d);
+  if(k>toKey) break;
+  if(r.end==='until'&&r.until&&k>r.until) break;
+  if(r.end==='count'&&i>=Math.max(1,+r.count||1)) break;
+  if(k>=fromKey) out.push(k);
+  if(r.type==='none'||!r.type) break;
+ }
+ return out;
+}
+function repeatLabel(r){
+ if(!r||r.type==='none'||!r.type) return '';
+ const n=Math.max(1,+r.every||1);
+ const base=r.type==='day'?(n===1?'매일':`${n}일마다`):r.type==='week'?(n===1?'매주':`${n}주마다`):(n===1?'매월':`${n}개월마다`);
+ return base+(r.end==='count'?` · ${r.count}회`:r.end==='until'&&r.until?` · ~${r.until.slice(5).replace('-','/')}`:'');
+}
 function makeDateMap(){
  const map={};
  // 달력은 항상 6줄(42칸)이라 앞뒤로 최대 2주가량 다른 달 날짜가 보일 수 있음
@@ -479,6 +530,15 @@ function makeDateMap(){
  const to=new Date(view.getFullYear(),view.getMonth()+1,0);
  to.setDate(to.getDate()+14);
  const limit=new Date(to); limit.setDate(limit.getDate()+120); // 이 날짜를 넘으면 더 계산할 필요 없음
+  // 직접 넣은 일정: 작품 일정은 작품 필터를 따르고, 개인 일정은 항상 표시
+ {
+  const fk=key(from), tk=key(to);
+  Object.values(events).forEach(ev=>{
+   const w=ev.workId?works.find(x=>x.id===ev.workId):null;
+   if(ev.workId&&(!w||!isVisible(w))) return;
+   eventOccurrences(ev,fk,tk).forEach(k=>(map[k]??=[]).push({type:'임의',ev,w,date:k}));
+  });
+ }
  works.filter(isVisible).forEach(w=>{
    // 1화(i=0)부터 시작: 시작일 이전에는 회차가 생기지 않도록 함.
    // 보이는 달 범위를 넘어갈 때까지 계산(예전의 '최대 80회차' 제한 제거).
@@ -591,6 +651,54 @@ function renderWorks(){
   </div>
  </div>`).join('');
 }
+function toggleEvDone(k){if(completed[k])delete completed[k];else completed[k]=true;saveCompleted();render();}
+function openEventModal(id,dateKey){
+ const ev=id?events[id]:null, g=x=>document.getElementById(x);
+ g('eventModalTitle').textContent=ev?'일정 수정':'일정 추가';
+ g('evId').value=ev?ev.id:'';
+ g('evTitle').value=ev?ev.title:'';
+ g('evDate').value=ev?ev.date:(dateKey||key(new Date()));
+ g('evWork').innerHTML='<option value="">개인 일정 (작품과 상관없음)</option>'+works.map(w=>`<option value="${w.id}">${esc(w.name)}</option>`).join('');
+ g('evWork').value=ev&&ev.workId?String(ev.workId):'';
+ const r=(ev&&ev.repeat)||{type:'none',every:1,end:'none',count:5,until:''};
+ g('evRepeat').value=r.type||'none'; g('evEvery').value=r.every||1; g('evEnd').value=r.end||'none'; g('evCount').value=r.count||5; g('evUntil').value=r.until||'';
+ g('evDelBtn').style.display=ev?'':'none';
+ toggleEvRepeat();
+ g('eventModal').classList.add('show');
+ setTimeout(()=>g('evTitle').focus(),0);
+}
+function closeEventModal(){document.getElementById('eventModal').classList.remove('show');}
+function toggleEvRepeat(){
+ const g=x=>document.getElementById(x), t=g('evRepeat').value, rep=t!=='none', end=g('evEnd').value;
+ g('evEveryWrap').style.visibility=rep&&t!=='none'?'visible':'hidden';
+ g('evEveryUnit').textContent=t==='day'?'일마다':t==='week'?'주마다':'개월마다';
+ g('evEndWrap').style.display=rep?'':'none';
+ g('evCount').style.display=g('evCountUnit').style.display=end==='count'?'':'none';
+ g('evUntil').style.display=end==='until'?'':'none';
+ const tmp={date:g('evDate').value||key(new Date()),repeat:readEvRepeat()};
+ const next=tmp.date?eventOccurrences(tmp,tmp.date,'9999-12-31').slice(0,4).map(k=>fmtD(dateOnly(k))):[];
+ g('evPreview').textContent=rep&&next.length?`날짜: ${next.join(' · ')}${next.length>=4?' …':''}`:'';
+}
+function readEvRepeat(){
+ const g=x=>document.getElementById(x), t=g('evRepeat').value;
+ if(t==='none') return {type:'none'};
+ return {type:t,every:Math.max(1,+g('evEvery').value||1),end:g('evEnd').value,count:Math.max(1,+g('evCount').value||1),until:g('evUntil').value||''};
+}
+function saveEvent(){
+ const g=x=>document.getElementById(x), title=g('evTitle').value.trim(), date=g('evDate').value;
+ if(!title||!date){alert('일정 이름과 날짜를 입력해주세요.');return;}
+ const id=g('evId').value||('e'+Date.now().toString(36)+Math.random().toString(36).slice(2,5));
+ const wv=g('evWork').value;
+ events[id]={id,title,date,workId:wv?+wv:null,repeat:readEvRepeat()};
+ saveEvents(); closeEventModal(); render();
+}
+function deleteEvent(){
+ const id=document.getElementById('evId').value; if(!id||!events[id]) return;
+ if(!confirm(`'${events[id].title}' 일정을 삭제할까요?${events[id].repeat&&events[id].repeat.type!=='none'?' (반복 일정 전체가 삭제돼요)':''}`)) return;
+ delete events[id]; saveEvents(); closeEventModal(); render();
+}
+function addEventFromNotePop(){const k=notePopKey; closeNotePop(true); openEventModal(null,k);}
+['evDate','evEvery','evCount','evUntil'].forEach(id=>document.addEventListener('input',e=>{if(e.target&&e.target.id===id)toggleEvRepeat();}));
 function toggleDone(workId,ep){const k=workId+'_'+ep;if(completed[k])delete completed[k];else completed[k]=true;saveCompleted();render();}
 function renderNotes(){document.getElementById('notes').innerHTML=works.map(w=>`<div class="noteCard"><div class="noteTitle"><span class="dot" style="background:${w.color};display:inline-block"></span> ${esc(w.name)}</div><textarea placeholder="마감 관련 메모..." oninput="notes[${w.id}]=this.value;saveNotes()">${esc(notes[w.id]||'')}</textarea></div>`).join('');}
 function render(){
@@ -654,6 +762,15 @@ function render(){
       let ev=document.createElement('div');ev.className='event';ev.style.background='#f1f3f4';ev.style.color='#5f6368';
       ev.innerHTML=`<b>${esc(item.w.name)}</b><br><span class="small">${item.s.ep}화 · 연재</span>`;
       cell.appendChild(ev);
+    } else if(item.type==='임의'){
+      const ckKey='ev_'+item.ev.id+'_'+item.date, ck=completed[ckKey]===true;
+      let ev=document.createElement('div');ev.className='event custom'+(item.w?'':' personal');
+      if(item.w){ev.style.background=item.w.color+'40';ev.style.borderLeft=`5px solid ${item.w.color}`;}
+      ev.title='클릭해서 일정 수정';
+      const rl=repeatLabel(item.ev.repeat);
+      ev.innerHTML=`<div><input class="done" type="checkbox" ${ck?'checked':''} onclick="event.stopPropagation();toggleEvDone('${ckKey}')"> <b style="${ck?'text-decoration:line-through;opacity:.55':''}">${esc(item.ev.title)}</b><br><span class="small">${item.w?esc(item.w.name):'개인 일정'}${rl?' · '+rl:''}</span></div>`;
+      ev.onclick=(e)=>{if(e.target.tagName!=='INPUT') openEventModal(item.ev.id)};
+      cell.appendChild(ev);
     } else if(showRelease && item.type==='휴재'){
       let ev=document.createElement('div');ev.className='event';ev.style.background='#f8f9fa';ev.style.color='#5f6368';
       ev.innerHTML=`<b>${esc(item.w.name)}</b><br><span class="small">휴재</span>`;
@@ -707,6 +824,9 @@ function openExport(id){
  document.getElementById('exTo').value=exportDefaultEnd(w);
  document.getElementById('exA').checked=!!(w.author&&w.author.enabled);
  document.getElementById('exR').checked=true; document.getElementById('exH').checked=true; document.getElementById('exD').checked=false;
+ const prev=(w.shares||[]).find(x=>x.name===w.name), chosen=new Set((prev&&prev.custom)||[]);
+ const mine=Object.values(events).filter(ev=>ev.workId===w.id).sort((a,b)=>a.date<b.date?-1:1);
+ document.getElementById('exCustomBox').innerHTML=mine.length?`<label>함께 공유할 기타 일정</label><div style="display:flex;flex-direction:column;gap:4px">${mine.map(ev=>`<label style="display:flex;align-items:center;gap:6px;margin:0;font-size:14px;color:#202124"><input type="checkbox" class="exC" value="${ev.id}" ${chosen.has(ev.id)?'checked':''} onchange="updateExport()" style="width:auto">${esc(ev.title)} <span style="color:#888;font-size:12px">${ev.date.slice(5).replace('-','/')}${repeatLabel(ev.repeat)?' · '+repeatLabel(ev.repeat):''}</span></label>`).join('')}</div>`:'';
  document.getElementById('exportModal').classList.add('show');
  updateExport();
 }
@@ -718,6 +838,7 @@ function shortShareCode(data){
  const D0=Date.UTC(2020,0,1), day=k=>{const [y,m,d]=k.split('-').map(Number);return Math.round((Date.UTC(y,m-1,d)-D0)/864e5);};
  const n36=v=>{const a=Math.abs(v),sg=v<0?'-':'';return sg+(a<36?a.toString(36):a<1296?'~'+a.toString(36).padStart(2,'0'):'!'+a.toString(36).padStart(4,'0'));};
  const groups=[];
+ if(data.c) return null; // 기타 일정이 있으면 긴 형식 사용
  for(const t of ['a','r','h','d']){
   const ev=data.e.filter(e=>e[0]===t); if(!ev.length) continue;
   if(t!=='h') ev.sort((x,y)=>x[1]-y[1]); else ev.sort((x,y)=>x[2]-y[2]);
@@ -734,10 +855,15 @@ function shareRange(w,spec){return {from:spec.autoFrom?key(new Date()).slice(0,7
 function buildShareData(w,spec){
  const {from,to}=shareRange(w,spec); if(!from||!to||from>to) return null;
  const endD=dateOnly(to+'-01'); const last=key(new Date(endD.getFullYear(),endD.getMonth()+1,0));
- const ev=exportEvents(w,from+'-01',last).filter(e=>spec.sel[e[0]]).sort((x,y)=>x[2]<y[2]?-1:1);
+ const ev=exportEvents(w,from+'-01',last).filter(e=>spec.sel[e[0]]);
+ const titles=[];
+ (spec.custom||[]).forEach(id=>{const ce=events[id]; if(!ce||ce.workId!==w.id) return; const idx=titles.push(ce.title)-1; eventOccurrences(ce,from+'-01',last).forEach(k=>ev.push(['c',idx,k]));});
+ ev.sort((x,y)=>x[2]<y[2]?-1:1);
  if(!ev.length) return {empty:true,ev};
  const base=ev[0][2], b=dateOnly(base);
- return {v:1,n:spec.name,at:key(new Date()),b:base,e:ev.map(([t,ep,d])=>[t,ep,Math.round((dateOnly(d)-b)/864e5)]),ev};
+ const out={v:1,n:spec.name,at:key(new Date()),b:base,e:ev.map(([t,ep,d])=>[t,ep,Math.round((dateOnly(d)-b)/864e5)]),ev};
+ if(titles.length) out.c=titles;
+ return out;
 }
 let exportSpec=null;
 function updateExport(){
@@ -745,13 +871,14 @@ function updateExport(){
  const g=id=>document.getElementById(id);
  const from=g('exFrom').value, to=g('exTo').value, name=g('exName').value.trim()||w.name;
  const sel={a:g('exA').checked,r:g('exR').checked,h:g('exH').checked,d:g('exD').checked};
- exportSpec={name,sel,from,to,autoFrom:from===key(new Date()).slice(0,7),autoTo:to===exportDefaultEnd(w)};
+ const custom=[...document.querySelectorAll('#exCustomBox .exC:checked')].map(x=>x.value);
+ exportSpec={name,sel,custom,from,to,autoFrom:from===key(new Date()).slice(0,7),autoTo:to===exportDefaultEnd(w)};
  let link='', msg=''; exportJson='';
  if(!from||!to||from>to){msg='<span style="color:#c5221f">기간을 확인해주세요. 시작 달이 끝 달보다 늦어요.</span>';}
  else{
   const r=buildShareData(w,exportSpec);
   const n=t=>r.ev.filter(e=>e[0]===t).length;
-  const parts=[['a','작가 최종고','개'],['r','연재일','개'],['h','휴재','주'],['d','마감','개']].filter(([t])=>sel[t]&&!(t==='h'&&!n(t))).map(([t,l,u])=>`${l} ${n(t)}${u}`);
+  const parts=[['a','작가 최종고','개'],['r','연재일','개'],['h','휴재','주'],['d','마감','개'],['c','기타 일정','개']].filter(([t])=>(t==='c'?n('c'):sel[t])&&!(t==='h'&&!n(t))).map(([t,l,u])=>`${l} ${n(t)}${u}`);
   if(r.empty){msg='<span style="color:#c5221f">이 기간에 선택한 일정이 없어요.</span>';}
   else{
    const {ev,...data}=r;
@@ -879,12 +1006,14 @@ function clearCfg(){
 }
 
 function snapshotData(){
- return {works,overrides,completed,notes,dateNotes};
+ return {works,overrides,completed,notes,dateNotes,events};
 }
 function replaceObj(target,src){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,src||{});}
 function applyData(d,at){
  works=(d.works||[]).map(normWork);
  replaceObj(overrides,d.overrides);replaceObj(completed,d.completed);replaceObj(notes,d.notes);replaceObj(dateNotes,d.dateNotes);
+ if(d.events) replaceObj(events,d.events); // 예전 버전에서 저장한 데이터엔 events가 없으므로 그때는 지금 일정을 유지
+ localStorage.setItem('workCalendarEventsV1',JSON.stringify(events));
  // 로컬에도 저장(클라우드로 다시 올리지는 않음)
  localStorage.setItem(KEY,JSON.stringify(works));
  localStorage.setItem('workCalendarOverridesV1',JSON.stringify(overrides));
@@ -897,11 +1026,11 @@ function applyData(d,at){
  if(typing){renderWorksAndCalendarOnly();}else render();
 }
 function renderWorksAndCalendarOnly(){const rn=renderNotes;renderNotes=function(){};try{render();}finally{renderNotes=rn;}}
-function hasData(d){return !!(d&&((d.works||[]).length||Object.keys(d.overrides||{}).length||Object.keys(d.notes||{}).length||Object.keys(d.dateNotes||{}).length));}
+function hasData(d){return !!(d&&((d.works||[]).length||Object.keys(d.overrides||{}).length||Object.keys(d.notes||{}).length||Object.keys(d.dateNotes||{}).length||Object.keys(d.events||{}).length));}
 function hasLocalData(){return hasData(snapshotData());}
 // 저장 형태(새로 생긴 항목, 기본값 등) 차이는 무시하고 실제 내용만 비교
 function stableStr(x){if(Array.isArray(x))return '['+x.map(stableStr).join(',')+']';if(x&&typeof x==='object')return '{'+Object.keys(x).filter(k=>x[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+stableStr(x[k])).join(',')+'}';return JSON.stringify(x===undefined?null:x);}
-function normData(d){return stableStr({works:(d.works||[]).map(normWork),overrides:d.overrides||{},completed:d.completed||{},notes:d.notes||{},dateNotes:d.dateNotes||{}});}
+function normData(d){return stableStr({works:(d.works||[]).map(normWork),overrides:d.overrides||{},completed:d.completed||{},notes:d.notes||{},dateNotes:d.dateNotes||{},events:d.events||{}});}
 
 function cloudPush(){
  markLocalEdit(); scheduleShareSync();
