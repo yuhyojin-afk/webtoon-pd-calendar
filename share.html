@@ -121,7 +121,24 @@ function decode(){
   const m=location.hash.match(/[#&]d=([^&]+)/); if(!m) return null;
   try{let b=m[1].replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';return JSON.parse(decodeURIComponent(escape(atob(b))));}catch(e){return null;}
 }
-const D=decode();
+function decodeShort(){
+  const m=location.hash.match(/[#&]s=(.+)$/); if(!m) return null;
+  try{
+    const parts=m[1].split('.'); if(parts[0]!=='2') return null;
+    const D0=Date.UTC(2020,0,1), kd=n=>{const d=new Date(D0+n*864e5);return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`;};
+    const at=kd(parseInt(parts[1],36)), b=kd(parseInt(parts[2],36)), k=+parts[3];
+    const nums=str=>{const out=[];let i=0;while(i<str.length){let sg=1;if(str[i]==='-'){sg=-1;i++;}let v;if(str[i]==='~'){v=parseInt(str.substr(i+1,2),36);i+=3;}else if(str[i]==='!'){v=parseInt(str.substr(i+1,4),36);i+=5;}else{v=parseInt(str[i],36);i++;}out.push(sg*v);}return out;};
+    const e=[];
+    for(let g=0;g<k;g++){
+      const grp=parts[4+g], t=grp[0], [head,body]=grp.slice(1).split('_');
+      const ep0=head?+head:null; let off=0;
+      nums(body).forEach((v,i)=>{off=i?off+v:v;e.push([t,ep0===null?null:ep0+i,off]);});
+    }
+    const n=decodeURIComponent(parts.slice(4+k).join('.'));
+    return {v:2,n,at,b,e};
+  }catch(err){return null;}
+}
+const D=decodeShort()||decode();
 if(!D){
   document.getElementById('app').innerHTML='<div class="empty"><h1>일정을 불러올 수 없어요</h1><p>공유받은 링크 전체가 복사되었는지 확인해 주세요.</p></div>';
 }else{
