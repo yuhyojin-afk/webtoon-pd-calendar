@@ -13,6 +13,7 @@
   --deliver:#0f7f63; --deliver-bg:#dcf7ee; --deliver-fg:#0b5e49;
   --release:#55605c; --release-bg:#eef1ef;
   --rest-bg:#f3f0ea; --rest-fg:#8a7f6a;
+  --custom:#7e57c2; --custom-bg:#efe9f8; --custom-fg:#5b3a99;
   --today:#1d2321;
   --display:Arial,"Noto Sans KR",sans-serif;
   --body:Arial,"Noto Sans KR",sans-serif;
@@ -22,13 +23,13 @@
   --author:#f59a4e; --author-bg:#3a2414; --author-fg:#ffc797;
   --deliver:#4fd6ae; --deliver-bg:#143229; --deliver-fg:#9cefd3;
   --release:#a8b2ae; --release-bg:#252b28;
-  --rest-bg:#26241f; --rest-fg:#b5aa94; --today:#e7ece9; color-scheme:dark}}
+  --rest-bg:#26241f; --rest-fg:#b5aa94; --custom:#b39ddb; --custom-bg:#2d2540; --custom-fg:#d7c8f5; --today:#e7ece9; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141816; --surface:#1c211f; --fg:#e7ece9; --muted:#9aa5a0; --line:#2e3532;
   --author:#f59a4e; --author-bg:#3a2414; --author-fg:#ffc797;
   --deliver:#4fd6ae; --deliver-bg:#143229; --deliver-fg:#9cefd3;
   --release:#a8b2ae; --release-bg:#252b28;
-  --rest-bg:#26241f; --rest-fg:#b5aa94; --today:#e7ece9; color-scheme:dark}
+  --rest-bg:#26241f; --rest-fg:#b5aa94; --custom:#b39ddb; --custom-bg:#2d2540; --custom-fg:#d7c8f5; --today:#e7ece9; color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55}
 .wrap{max-width:1080px;margin:0 auto;padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
@@ -49,6 +50,7 @@ h1{font-family:var(--display);font-size:clamp(28px,5vw,40px);margin:0;line-heigh
 .c-author{background:var(--author-bg);color:var(--author-fg);box-shadow:inset 3px 0 0 var(--author)}
 .c-deliver{background:var(--deliver-bg);color:var(--deliver-fg)}
 .c-release{background:var(--release-bg);color:var(--release);font-weight:500}
+.c-custom{background:var(--custom-bg);color:var(--custom-fg);box-shadow:inset 3px 0 0 var(--custom)}
 .c-rest{background:repeating-linear-gradient(135deg,var(--rest-bg) 0 6px,transparent 6px 10px);color:var(--rest-fg);font-weight:500;border:1px dashed var(--rest-fg)}
 .filters{display:flex;flex-wrap:wrap;gap:8px}
 .filters button{font:inherit;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
@@ -104,10 +106,10 @@ section h2.sec{font-family:var(--display);font-size:22px;margin:0 0 10px}
 </div>
 <script>
 // 공유 링크(#d=...)에 담긴 일정만 보여주는 읽기 전용 페이지. 로그인·저장 없음.
-const T={a:'author',d:'deliver',r:'release',h:'rest'};
-const NAMES_ALL={author:'작가 최종고',deliver:'플랫폼 전달',release:'연재일',rest:'휴재'};
-const LEG={author:'<span class="chip c-author">✍ 최종고</span> 작가님 최종고 마감',deliver:'<span class="chip c-deliver">전달</span> 플랫폼 전달 마감',release:'<span class="chip c-release">연재</span> 연재(공개)일',rest:'<span class="chip c-rest">휴재</span> 휴재 주'};
-const ORDER={author:0,deliver:1,release:2,rest:3};
+const T={a:'author',d:'deliver',r:'release',h:'rest',c:'custom'};
+const NAMES_ALL={author:'작가 최종고',deliver:'플랫폼 전달',release:'연재일',rest:'휴재',custom:'기타 일정'};
+const LEG={author:'<span class="chip c-author">✍ 최종고</span> 작가님 최종고 마감',deliver:'<span class="chip c-deliver">전달</span> 플랫폼 전달 마감',release:'<span class="chip c-release">연재</span> 연재(공개)일',rest:'<span class="chip c-rest">휴재</span> 휴재 주',custom:'<span class="chip c-custom">일정</span> 기타 일정'};
+const ORDER={author:0,custom:1,deliver:2,release:3,rest:4};
 const DOW=['일','월','화','수','목','금','토'];
 const pad=n=>String(n).padStart(2,'0');
 const key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -154,7 +156,7 @@ if(!D){
   document.getElementById('app').innerHTML='<div class="empty"><h1>일정을 불러올 수 없어요</h1><p>공유받은 링크 전체가 복사되었는지 확인해 주세요.</p></div>';
 }else{
   const base=parse(D.b);
-  const EV=D.e.map(([t,ep,off])=>{const d=new Date(base);d.setDate(base.getDate()+off);return {t:T[t],ep:ep||null,d:key(d)};});
+  const EV=D.e.map(([t,ep,off])=>{const d=new Date(base);d.setDate(base.getDate()+off);return t==='c'?{t:'custom',ep:null,title:(D.c||[])[ep]||'일정',d:key(d)}:{t:T[t],ep:ep||null,d:key(d)};});
   const TYPES=Object.keys(NAMES_ALL).filter(t=>EV.some(e=>e.t===t));
   const show={};TYPES.forEach(t=>show[t]=true);
   const SK='shareShow:'+D.n;
@@ -167,8 +169,8 @@ if(!D){
   document.getElementById('note').textContent=D.v===1&&/^#[A-Za-z0-9]{5,12}$/.test(location.hash)?`일정이 바뀌면 이 링크에 자동으로 반영돼요. 새로고침하면 최신 일정을 볼 수 있어요. (마지막 업데이트 ${fmtLong(D.at)})`:`${fmtLong(D.at)} 기준 일정이에요. 일정이 바뀌면 새 링크로 다시 보내드릴게요.`;
   document.getElementById('legend').innerHTML=TYPES.map(t=>`<span>${LEG[t]}</span>`).join('');
 
-  const chipText=e=>e.t==='rest'?'휴재':`${e.t==='author'?'✍ ':''}${e.ep}화 ${e.t==='author'?'최종고':e.t==='deliver'?'전달':'연재'}`;
-  const chip=e=>`<span class="chip c-${e.t}" title="${e.ep?e.ep+'화 ':''}${NAMES_ALL[e.t]}">${chipText(e)}</span>`;
+  const chipText=e=>e.t==='custom'?esc(e.title):e.t==='rest'?'휴재':`${e.t==='author'?'✍ ':''}${e.ep}화 ${e.t==='author'?'최종고':e.t==='deliver'?'전달':'연재'}`;
+  const chip=e=>`<span class="chip c-${e.t}" title="${e.t==='custom'?esc(e.title):(e.ep?e.ep+'화 ':'')+NAMES_ALL[e.t]}">${chipText(e)}</span>`;
 
   function renderNext(){
     const up=t=>EV.filter(e=>e.t===t&&e.d>=today).sort((a,b)=>a.d<b.d?-1:1)[0];
@@ -211,7 +213,7 @@ if(!D){
     document.getElementById('months').innerHTML=html;
   }
   function renderTable(){
-    const cols=TYPES.filter(t=>t!=='rest');
+    const cols=TYPES.filter(t=>t!=='rest'&&t!=='custom');
     if(!eps.length||!cols.length){document.getElementById('tableSec').hidden=true;return;}
     document.getElementById('thead').innerHTML=`<tr><th>회차</th>${cols.map(t=>`<th>${NAMES_ALL[t]}</th>`).join('')}</tr>`;
     const get=(t,ep)=>EV.find(e=>e.t===t&&e.ep===ep);
