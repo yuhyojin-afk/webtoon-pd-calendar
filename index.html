@@ -289,7 +289,7 @@ function saveWork(){
 }
 function duplicateWork(id){
  const w=works.find(x=>x.id===id); if(!w)return;
- const copy={...w,name:w.name+' (복사본)',author:{...normAuthor(w.author),shifts:[]}};
+ const copy={...w,name:w.name+' (복사본)',author:{...normAuthor(w.author),shifts:[]},shares:[]};
  openModal(copy);
  document.getElementById('editId').value='';
  document.getElementById('modalTitle').textContent='작품 추가';
@@ -729,45 +729,78 @@ function shortShareCode(data){
  return ['2',day(data.at).toString(36),day(data.b).toString(36),groups.length,...groups].join('.')+'.'+encodeURIComponent(data.n);
 }
 function b64url(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+// 공유 설정(spec) → 공유용 일정 데이터. 기간을 기본값 그대로 두면 일정이 늘어나도 자동으로 따라감
+function shareRange(w,spec){return {from:spec.autoFrom?key(new Date()).slice(0,7):spec.from, to:spec.autoTo?exportDefaultEnd(w):spec.to};}
+function buildShareData(w,spec){
+ const {from,to}=shareRange(w,spec); if(!from||!to||from>to) return null;
+ const endD=dateOnly(to+'-01'); const last=key(new Date(endD.getFullYear(),endD.getMonth()+1,0));
+ const ev=exportEvents(w,from+'-01',last).filter(e=>spec.sel[e[0]]).sort((x,y)=>x[2]<y[2]?-1:1);
+ if(!ev.length) return {empty:true,ev};
+ const base=ev[0][2], b=dateOnly(base);
+ return {v:1,n:spec.name,at:key(new Date()),b:base,e:ev.map(([t,ep,d])=>[t,ep,Math.round((dateOnly(d)-b)/864e5)]),ev};
+}
+let exportSpec=null;
 function updateExport(){
  const w=works.find(x=>x.id===exportId); if(!w) return;
  const g=id=>document.getElementById(id);
  const from=g('exFrom').value, to=g('exTo').value, name=g('exName').value.trim()||w.name;
  const sel={a:g('exA').checked,r:g('exR').checked,h:g('exH').checked,d:g('exD').checked};
- let link='', msg='';
+ exportSpec={name,sel,from,to,autoFrom:from===key(new Date()).slice(0,7),autoTo:to===exportDefaultEnd(w)};
+ let link='', msg=''; exportJson='';
  if(!from||!to||from>to){msg='<span style="color:#c5221f">기간을 확인해주세요. 시작 달이 끝 달보다 늦어요.</span>';}
  else{
-  const endD=dateOnly(to+'-01'); const last=key(new Date(endD.getFullYear(),endD.getMonth()+1,0));
-  const ev=exportEvents(w,from+'-01',last).filter(e=>sel[e[0]]).sort((x,y)=>x[2]<y[2]?-1:1);
-  const n=t=>ev.filter(e=>e[0]===t).length;
+  const r=buildShareData(w,exportSpec);
+  const n=t=>r.ev.filter(e=>e[0]===t).length;
   const parts=[['a','작가 최종고','개'],['r','연재일','개'],['h','휴재','주'],['d','마감','개']].filter(([t])=>sel[t]&&!(t==='h'&&!n(t))).map(([t,l,u])=>`${l} ${n(t)}${u}`);
-  if(!ev.length){msg='<span style="color:#c5221f">이 기간에 선택한 일정이 없어요.</span>';}
+  if(r.empty){msg='<span style="color:#c5221f">이 기간에 선택한 일정이 없어요.</span>';}
   else{
-   const base=ev[0][2], b=dateOnly(base);
-   const data={v:1,n:name,at:key(new Date()),b:base,e:ev.map(([t,ep,d])=>[t,ep,Math.round((dateOnly(d)-b)/864e5)])};
+   const {ev,...data}=r;
    const short=shortShareCode(data);
    link=new URL('share.html',ONLINE_URL).href+(short?'#s='+short:'#d='+b64url(JSON.stringify(data)));
    exportJson=JSON.stringify(data); exportLong=link;
+   const existing=(w.shares||[]).find(x=>x.name===name);
    if(shortCache[exportJson]) link=shortCache[exportJson];
    msg=parts.join(' · ');
-   if(!shortCache[exportJson]&&fbUser) msg+='<br><span style="color:#5f6368">링크 복사를 누르면 짧은 링크로 바뀌어요</span>';
+   if(fbUser) msg+=existing?'<br><span style="color:#1e8e3e">이 이름으로 보낸 링크가 있어요. 같은 링크가 유지되고 내용만 최신으로 바뀌어요.</span>':'<br><span style="color:#5f6368">링크 복사를 누르면 짧은 링크로 바뀌어요. 이후 일정을 바꾸면 링크 내용도 자동으로 업데이트돼요.</span>';
   }
  }
  g('exCount').innerHTML=msg; g('exLink').value=link;
 }
 // 짧은 링크: 로그인 상태면 공유용 일정을 Firebase(shares/번호)에 저장하고 …/s#번호 링크를 만듦
 let exportJson='', exportLong='', shortCache={};
+// 작품마다 보낸 링크(w.shares)를 기억해 두고, 일정이 바뀌면 같은 링크의 내용을 자동으로 업데이트함
+var shareLast={}, shareTimer=null;
+const shareUrl=id=>new URL('s',ONLINE_URL).href+'#'+id;
+const shareCmp=d=>JSON.stringify({...d,at:0});
+async function writeShare(id,data){
+ await firebase.firestore().collection('shares').doc(id).set({data:JSON.stringify(data),owner:fbUser.uid,updatedAt:Date.now()});
+ shareLast[id]=shareCmp(data);
+}
 async function ensureShortLink(){
  if(!exportJson) return '';
  if(shortCache[exportJson]) return shortCache[exportJson];
- if(!fbUser||typeof firebase==='undefined') return exportLong;
+ const w=works.find(x=>x.id===exportId);
+ if(!w||!fbUser||typeof firebase==='undefined') return exportLong;
+ w.shares=Array.isArray(w.shares)?w.shares:[];
+ let s=w.shares.find(x=>x.name===exportSpec.name);
  const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
- const id=Array.from(crypto.getRandomValues(new Uint8Array(7)),b=>chars[b%chars.length]).join('');
+ const id=s?s.id:Array.from(crypto.getRandomValues(new Uint8Array(7)),b=>chars[b%chars.length]).join('');
  try{
-  await firebase.firestore().collection('shares').doc(id).set({data:exportJson,owner:fbUser.uid,createdAt:Date.now()});
-  const link=new URL('s',ONLINE_URL).href+'#'+id;
-  shortCache[exportJson]=link; return link;
+  await writeShare(id,JSON.parse(exportJson));
+  const spec={id,...exportSpec};
+  if(s) Object.assign(s,spec); else w.shares.push(spec);
+  save();
+  const link=shareUrl(id); shortCache[exportJson]=link; return link;
  }catch(e){console.error(e);toast('짧은 링크를 만들지 못해 긴 링크를 사용해요');return exportLong;}
+}
+function scheduleShareSync(){clearTimeout(shareTimer);shareTimer=setTimeout(syncShares,1500);}
+async function syncShares(){
+ if(!fbUser||typeof firebase==='undefined') return;
+ for(const w of works) for(const s of (Array.isArray(w.shares)?w.shares:[])){
+  const r=buildShareData(w,s); if(!r||r.empty) continue;
+  const {ev,...data}=r; if(shareLast[s.id]===shareCmp(data)) continue;
+  try{await writeShare(s.id,data);}catch(e){console.error(e);}
+ }
 }
 async function copyExport(){
  const el=document.getElementById('exLink'); if(!el.value) return;
@@ -871,7 +904,7 @@ function stableStr(x){if(Array.isArray(x))return '['+x.map(stableStr).join(',')+
 function normData(d){return stableStr({works:(d.works||[]).map(normWork),overrides:d.overrides||{},completed:d.completed||{},notes:d.notes||{},dateNotes:d.dateNotes||{}});}
 
 function cloudPush(){
- markLocalEdit();
+ markLocalEdit(); scheduleShareSync();
  if(!cloudReady||!fbDoc) return;
  setSync('saving');
  clearTimeout(pushTimer);
