@@ -164,7 +164,7 @@ if(!D){
   const eps=[...new Set(EV.filter(e=>e.ep).map(e=>e.ep))].sort((a,b)=>a-b);
   document.getElementById('eyebrow').textContent=`작가님 공유용${eps.length?` · ${eps[0]}~${eps[eps.length-1]}화`:''}`;
   document.getElementById('sub').textContent=TYPES.map(t=>NAMES_ALL[t]).join(', ')+'을(를) 한눈에 볼 수 있게 정리했어요.';
-  document.getElementById('note').textContent=`${fmtLong(D.at)} 기준 일정이에요. 일정이 바뀌면 새 링크로 다시 보내드릴게요.`;
+  document.getElementById('note').textContent=D.v===1&&/^#[A-Za-z0-9]{5,12}$/.test(location.hash)?`일정이 바뀌면 이 링크에 자동으로 반영돼요. 새로고침하면 최신 일정을 볼 수 있어요. (마지막 업데이트 ${fmtLong(D.at)})`:`${fmtLong(D.at)} 기준 일정이에요. 일정이 바뀌면 새 링크로 다시 보내드릴게요.`;
   document.getElementById('legend').innerHTML=TYPES.map(t=>`<span>${LEG[t]}</span>`).join('');
 
   const chipText=e=>e.t==='rest'?'휴재':`${e.t==='author'?'✍ ':''}${e.ep}화 ${e.t==='author'?'최종고':e.t==='deliver'?'전달':'연재'}`;
