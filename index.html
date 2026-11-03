@@ -659,7 +659,9 @@ function openEventModal(id,dateKey){
  g('evTitle').value=ev?ev.title:'';
  g('evDate').value=ev?ev.date:(dateKey||key(new Date()));
  g('evWork').innerHTML='<option value="">개인 일정 (작품과 상관없음)</option>'+works.map(w=>`<option value="${w.id}">${esc(w.name)}</option>`).join('');
- g('evWork').value=ev&&ev.workId?String(ev.workId):'';
+ // 새 일정: 작품 필터가 걸려 있으면 그 작품(여러 개면 목록에서 첫 번째)을 기본으로, 아니면 개인 일정
+ const fw=works.find(w=>selectedWorks.size&&selectedWorks.has(w.id));
+ g('evWork').value=ev?(ev.workId?String(ev.workId):''):(fw?String(fw.id):'');
  const r=(ev&&ev.repeat)||{type:'none',every:1,end:'none',count:5,until:''};
  g('evRepeat').value=r.type||'none'; g('evEvery').value=r.every||1; g('evEnd').value=r.end||'none'; g('evCount').value=r.count||5; g('evUntil').value=r.until||'';
  g('evDelBtn').style.display=ev?'':'none';
