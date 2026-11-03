@@ -138,7 +138,18 @@ function decodeShort(){
     return {v:2,n,at,b,e};
   }catch(err){return null;}
 }
-const D=decodeShort()||decode();
+// 짧은 링크(s#번호): 공유용 일정을 Firebase에서 읽어옴 (읽기 전용, 로그인 불필요)
+async function loadRemote(){
+  const m=location.hash.match(/^#([A-Za-z0-9]{5,12})$/); if(!m) return null;
+  document.getElementById('title').textContent='일정을 불러오는 중…';
+  try{
+    const r=await fetch(`https://firestore.googleapis.com/v1/projects/webtoon-pd-calendar/databases/(default)/documents/shares/${m[1]}?key=AIzaSyA_W6zLhHmplxu5rkaTFMGRNdM7GLPnSEA`);
+    if(!r.ok) return null;
+    const j=await r.json(); return JSON.parse(j.fields.data.stringValue);
+  }catch(e){return null;}
+}
+(async()=>{
+const D=decodeShort()||decode()||await loadRemote();
 if(!D){
   document.getElementById('app').innerHTML='<div class="empty"><h1>일정을 불러올 수 없어요</h1><p>공유받은 링크 전체가 복사되었는지 확인해 주세요.</p></div>';
 }else{
@@ -212,6 +223,7 @@ if(!D){
   }
   renderNext();renderFilters();renderMonths();renderTable();
 }
+})();
 </script>
 </body>
 </html>
