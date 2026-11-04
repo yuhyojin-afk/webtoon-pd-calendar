@@ -12,6 +12,9 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 .main{flex:1;display:flex;flex-direction:column;min-width:0}.content{flex:1;display:flex;min-height:0}.calendarWrap{flex:1;min-width:0;display:flex;flex-direction:column}.notes{width:245px;border-left:1px solid #dadce0;background:#fafafa;padding:14px;overflow:auto}.noteCard{background:#fff;border:1px solid #dadce0;border-radius:8px;margin-bottom:10px;padding:10px}.noteTitle{font-size:13px;font-weight:600;margin-bottom:7px}.noteCard textarea{width:100%;height:72px;resize:vertical;border:1px solid #dadce0;border-radius:5px;padding:7px;font:12px Arial,"Noto Sans KR",sans-serif}.done{accent-color:#1a73e8}.top{height:68px;border-bottom:1px solid #dadce0;display:flex;align-items:center;padding:0 20px;gap:12px}.top .title{font-size:21px;font-weight:600;min-width:210px}.nav{display:flex;gap:4px}.nav button{border:0;background:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px}.nav button:hover{background:#f1f3f4}.today{border:1px solid #dadce0;background:#fff;border-radius:5px;padding:8px 13px;cursor:pointer}.toggle{border:1px solid #dadce0;background:#fff;border-radius:18px;padding:8px 13px;cursor:pointer}.toggle.active{background:#e8f0fe;color:#1967d2;border-color:#aecbfa}.grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:38px repeat(6,1fr);min-height:0}.dow{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;text-align:center;padding:10px;font-size:12px;color:#5f6368}.cell{border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;padding:5px;overflow:auto;position:relative;cursor:pointer}
 .cell.hasNote::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-top:11px solid #f9ab00;border-left:11px solid transparent;pointer-events:none}
 .cell.noteOpen{box-shadow:inset 0 0 0 2px #1a73e8}
+.dropPick{display:none;position:fixed;z-index:70;background:#fff;border:1px solid #dadce0;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.18);padding:10px;min-width:220px}.dropPick.show{display:block}
+.dropPick .t{font-size:12px;color:#5f6368;margin-bottom:8px;line-height:1.4}.dropPick .t b{color:#202124}
+.dropPick .b{display:flex;flex-direction:column;gap:6px}.dropPick button{border:1px solid #dadce0;background:#fff;border-radius:16px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;text-align:left}.dropPick button:hover{background:#f1f3f4}.dropPick button.p{background:#1a73e8;border-color:#1a73e8;color:#fff}.dropPick button.c{border:0;color:#5f6368;font-weight:400;text-align:center}
 .event.custom{border:1px solid rgba(0,0,0,.08);cursor:pointer}.event.custom.personal{background:#efe9f8;border-left:5px solid #7e57c2}
 .notePop{display:none;position:fixed;z-index:60;width:250px;background:#fff;border:1px solid #dadce0;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);padding:10px}.notePop.show{display:block}
 .notePop .t{font-size:12px;font-weight:600;color:#5f6368;margin-bottom:6px}
@@ -35,7 +38,7 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <h1>📅 작품 마감 캘린더</h1>
 <button class="btn" onclick="openModal()">＋ 작품 추가</button> <button class="btn" onclick="openEventModal(null,key(new Date()))" title="런칭일, 표지 작업, 회의처럼 직접 넣는 일정">＋ 일정 추가</button>
 <div class="section"><h3>작품</h3><div id="works"></div></div>
-<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 일정이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br><b>날짜 칸의 빈 곳을 클릭</b>하면 그 날짜로 일정 추가 창이 열립니다. 창 왼쪽 아래 <b>날짜 메모</b>를 누르면 그날 메모를 남길 수 있습니다. 메모가 있는 날은 칸 오른쪽 위 모서리에 노란 삼각형이 표시되고, 마우스를 올리면 내용이 보입니다. 내용을 지우고 저장하면 메모가 삭제됩니다.<br><br><b>＋ 일정 추가</b>(또는 날짜 칸의 빈 곳 클릭)으로 런칭·표지 작업·회의 같은 일정을 직접 넣을 수 있습니다. 작품을 고르면 작품 색으로, 고르지 않으면 보라색 개인 일정으로 표시됩니다. 일마다/주마다/매월 반복도 가능하고, 일정을 클릭하면 수정·삭제할 수 있습니다. 작품 일정은 공유용 추출에서 골라서 작가님께 함께 보낼 수 있습니다.</div></details>
+<details class="legend" id="legendBox"><summary>ⓘ 사용법 보기</summary><div style="margin-top:8px">기본 화면은 <b>원고 마감일</b>만 표시됩니다.<br>연재일 보기 버튼으로 연재/휴재일을 함께 볼 수 있습니다.<br><br>작품명을 클릭하면 <b>설정을 수정</b>할 수 있습니다.<br>상단 <b>☰ 작품명</b> 필터에서 보고 싶은 작품만 골라 볼 수 있습니다(아무것도 고르지 않으면 전체 표시).<br>⚙ 설정 수정 · ⧉ 같은 설정 복사 · ↺ 밀린 일정 초기화<br><br>마감 일정은 자동 계산되며, <b>마감 일정을 다른 날짜로 드래그</b>하면 옮길 수 있습니다.<br>"이후 회차도 함께 밀기"를 선택하면 그 회차부터 이후 마감이 통째로 같은 간격만큼 밀립니다(작가 사정으로 전체가 지연될 때). 연재일은 바뀌지 않으니, 연재 요일 자체를 바꾸려면 작품 설정을 고쳐주세요. 해제하면 그 회차만 바뀝니다. 클릭하면 직접 날짜를 입력할 수도 있습니다.<br><br><b>✍ 작가 최종고 마감</b>은 점선 테두리로 표시됩니다. 작품 설정에서 첫 마감일·시작 회차·<b>마감 주기(1~20일)</b>를 입력하면 그 날짜부터 N일마다 자동 계산됩니다. <b>중간 주기 변경</b>으로 "36화부터 7일마다"처럼 특정 회차 이후 주기를 바꿀 수 있습니다. PD 마감과 똑같이 드래그/클릭으로 옮기거나 이후 회차까지 함께 밀 수 있습니다.<br><br><b>날짜 칸의 빈 곳을 클릭</b>하면 그 날짜로 일정 추가 창이 열립니다. 창 왼쪽 아래 <b>날짜 메모</b>를 누르면 그날 메모를 남길 수 있습니다. 메모가 있는 날은 칸 오른쪽 위 모서리에 노란 삼각형이 표시되고, 마우스를 올리면 내용이 보입니다. 내용을 지우고 저장하면 메모가 삭제됩니다.<br><br><b>＋ 일정 추가</b>(또는 날짜 칸의 빈 곳 클릭)으로 런칭·표지 작업·회의 같은 일정을 직접 넣을 수 있습니다. 작품을 고르면 작품 색으로, 고르지 않으면 보라색 개인 일정으로 표시됩니다. 일마다/주마다/매월 반복도 가능하고, 일정을 클릭하면 수정·삭제할 수 있습니다. 작품 일정은 공유용 추출에서 골라서 작가님께 함께 보낼 수 있습니다.</div></details>
 </aside>
 <main class="main">
 <div class="top">
@@ -113,6 +116,11 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <div class="actions"><button class="btn" onclick="closeExport()">닫기</button><button class="btn" onclick="previewExport()">미리보기</button><button class="btn primary" onclick="copyExport()">링크 복사</button></div>
 </div></div>
 
+<div class="dropPick" id="dropPick" role="dialog" aria-label="일정 옮기기">
+ <div class="t" id="dropPickTitle"></div>
+ <div class="b" id="dropPickBtns"></div>
+</div>
+
 <div class="modal" id="moveModal">
 <div class="box">
 <h2 id="moveModalTitle">마감일 변경</h2>
@@ -120,8 +128,8 @@ h1{font-size:20px;margin:0 0 22px}.btn{border:1px solid #dadce0;background:#fff;
 <div class="field"><label>새 마감일</label><input id="moveDate" type="date"></div>
 <div class="checkRow">
  <input id="cascadeCheck" type="checkbox" checked>
- <label for="cascadeCheck" class="ct">이 회차부터 이후 모든 회차 일정도 함께 밀기
-  <small>작가 사정 등으로 이 회차부터 일정이 통째로 며칠 밀렸을 때 사용하세요. 이후 회차들도 같은 간격만큼 자동으로 밀립니다. 체크 해제하면 이 회차만 바뀝니다.</small>
+ <label for="cascadeCheck" class="ct">이 회차부터 이후 회차 마감도 함께 옮기기 (밀기·당기기)
+  <small>작가 사정 등으로 이 회차부터 마감이 통째로 며칠 밀렸을 때 사용하세요. 이후 회차 마감도 같은 간격만큼 자동으로 밀립니다(연재일은 그대로). 체크 해제하면 이 회차만 바뀝니다.</small>
  </label>
 </div>
 <div class="actions"><button class="btn" onclick="closeMoveModal()">취소</button><button class="btn primary" onclick="confirmMove()">적용</button></div>
@@ -179,7 +187,12 @@ function normAuthor(a){
  if(!a)return {enabled:false,start:'',episode:1,endEpisode:null,interval:7,changes:[],shifts:[]};
  return {enabled:!!a.enabled,start:a.start||'',episode:+a.episode||1,endEpisode:(+a.endEpisode>0?+a.endEpisode:null),interval:clamp(a.interval,1,20,7),changes:Array.isArray(a.changes)?a.changes:[],shifts:Array.isArray(a.shifts)?a.shifts:[]};
 }
-function normWork(w){return {...w,breakWeeks:(w.breakWeeks===0?0:Math.max(1,+w.breakWeeks||1)),shifts:Array.isArray(w.shifts)?w.shifts:[],author:normAuthor(w.author)};}
+function normWork(w){
+ const o={...w,breakWeeks:(w.breakWeeks===0?0:Math.max(1,+w.breakWeeks||1)),shifts:Array.isArray(w.shifts)?w.shifts:[],releaseShifts:Array.isArray(w.releaseShifts)?w.releaseShifts:[],author:normAuthor(w.author)};
+ // 예전 방식의 '함께 밀기'는 연재일까지 밀었으므로, 보이는 일정이 바뀌지 않게 연재일 밀림(releaseShifts)으로 옮김. 이후 '함께 밀기'는 마감만 옮김
+ if(o.shiftModel!==2){ if(o.shifts.length){o.releaseShifts=o.releaseShifts.concat(o.shifts);o.shifts=[];} o.shiftModel=2; }
+ return o;
+}
 let works=JSON.parse(localStorage.getItem(KEY)||'[]').map(normWork);
 let view=new Date(); view.setDate(1);
 
@@ -307,7 +320,7 @@ function saveWork(){
    const idx=works.findIndex(w=>w.id===id);
    if(idx>=0) works[idx]={...works[idx],...data,author:{...data.author,shifts:works[idx].author?.shifts||[]}};
  }else{
-   works.push({id:Date.now(),...data,author:{...data.author,shifts:[]}});
+   works.push({id:Date.now(),...data,shiftModel:2,author:{...data.author,shifts:[]}});
  }
  save();closeModal();render();
 }
@@ -459,6 +472,9 @@ function deleteDateNote(){
 function shiftDaysFor(w,ep){
  return (w.shifts||[]).filter(sh=>sh.ep<=ep).reduce((sum,sh)=>sum+sh.days,0);
 }
+function releaseShiftFor(w,ep){
+ return (w.releaseShifts||[]).filter(sh=>sh.ep<=ep).reduce((sum,sh)=>sum+sh.days,0);
+}
 // 시작일 이후 '연재 요일'에 해당하는 첫 날짜 (연재 요일 설정을 실제로 반영)
 function calcFirstRelease(startStr, weekday){
  const s=dateOnly(startStr);
@@ -474,10 +490,11 @@ function episodeSchedule(w, episodeIndex){
  const pos=episodeIndex%w.cycle;
  const ep=w.episode+episodeIndex;
  const release=firstReleaseDate(w);
- release.setDate(release.getDate()+cycleNo*cycleLen*7+pos*7+shiftDaysFor(w,ep));
+ release.setDate(release.getDate()+cycleNo*cycleLen*7+pos*7+releaseShiftFor(w,ep));
+ // '이후 회차도 함께 밀기'(shifts)는 마감일만 밀고 연재일은 그대로 둠
  const offset={same:0,prev1:-1,prev2:-2,prev3:-3}[w.deadline]??0;
  const deadline=new Date(release);
- deadline.setDate(deadline.getDate()+offset);
+ deadline.setDate(deadline.getDate()+offset+shiftDaysFor(w,ep));
  return {ep, release, deadline};
 }
 // 작가 최종고 마감 일정: 첫 마감일부터 N일(1~20)마다 반복
@@ -573,7 +590,7 @@ function makeDateMap(){
        const lastEp=w.episode+c*w.cycle+w.cycle-1;
        if(w.finalEpisode && lastEp>=w.finalEpisode) break;
        const base=firstReleaseDate(w);
-       base.setDate(base.getDate()+c*(w.cycle+(w.breakWeeks??1))*7+w.cycle*7+shiftDaysFor(w,lastEp));
+       base.setDate(base.getDate()+c*(w.cycle+(w.breakWeeks??1))*7+w.cycle*7+releaseShiftFor(w,lastEp));
        if(base>limit) break;
        for(let bw=0;bw<(w.breakWeeks??1);bw++){
          const d=new Date(base); d.setDate(base.getDate()+bw*7);
@@ -588,6 +605,34 @@ function makeDateMap(){
 }
 let dragItem=null;
 let moveContext=null;
+// 마감을 끌어다 놓으면: '이 회차만' / '이후 회차도 함께' 중 고르는 작은 창 (앞으로 당기기도 같음)
+function hideDropPick(){document.getElementById('dropPick').classList.remove('show');}
+function showDropPick(item,toKey,e){
+ const {w,s}=item, isA=item.type==='작가마감', oid=w.id+(isA?'_a_':'_')+s.ep;
+ const fromKey=overrides[oid]||key(s.deadline), autoKey=key(s.deadline);
+ if(toKey===fromKey) return;
+ const days=Math.round((dateOnly(toKey)-dateOnly(fromKey))/864e5);
+ const pick=document.getElementById('dropPick');
+ document.getElementById('dropPickTitle').innerHTML=`<b>${esc(w.name)} ${s.ep}화 ${isA?'작가 최종고':'마감'}</b><br>${fmtD(dateOnly(fromKey))} → ${fmtD(dateOnly(toKey))} (${days>0?days+'일 밀기':(-days)+'일 당기기'})`;
+ const apply=(cascade)=>{moveContext={workId:w.id,ep:s.ep,fromKey,autoKey,isA};document.getElementById('moveDate').value=toKey;document.getElementById('cascadeCheck').checked=cascade;hideDropPick();confirmMove();};
+ const box=document.getElementById('dropPickBtns'); box.innerHTML='';
+ [['이 회차만 옮기기',false,''],[`${s.ep}화부터 이후 회차도 함께`,true,'p']].forEach(([t,c,cls])=>{const b=document.createElement('button');b.type='button';b.textContent=t;if(cls)b.className=cls;b.onclick=()=>apply(c);box.appendChild(b);});
+ const cb=document.createElement('button');cb.type='button';cb.className='c';cb.textContent='취소';cb.onclick=hideDropPick;box.appendChild(cb);
+ pick.classList.add('show');
+ let x=e.clientX+8,y=e.clientY+8; if(x+pick.offsetWidth>innerWidth-8)x=e.clientX-pick.offsetWidth-8; if(y+pick.offsetHeight>innerHeight-8)y=innerHeight-pick.offsetHeight-8;
+ pick.style.left=Math.max(8,x)+'px'; pick.style.top=Math.max(8,y)+'px';
+}
+document.addEventListener('mousedown',e=>{if(!e.target.closest('#dropPick'))hideDropPick();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hideDropPick();});
+// 직접 넣은 일정 끌어다 옮기기: 한 번짜리는 그 날짜로, 반복 일정은 반복 전체를 같은 간격만큼 옮김
+function moveEventByDrag(item,toKey){
+ const ev=events[item.ev.id]; if(!ev||toKey===item.date) return;
+ const days=Math.round((dateOnly(toKey)-dateOnly(item.date))/864e5);
+ const d=dateOnly(ev.date); d.setDate(d.getDate()+days); ev.date=key(d);
+ if(ev.repeat&&ev.repeat.end==='until'&&ev.repeat.until){const u=dateOnly(ev.repeat.until);u.setDate(u.getDate()+days);ev.repeat.until=key(u);}
+ saveEvents(); render();
+ if(ev.repeat&&ev.repeat.type&&ev.repeat.type!=='none') toast(`'${ev.title}' 반복 일정 전체를 ${Math.abs(days)}일 ${days>0?'뒤로':'앞으로'} 옮겼어요`);
+}
 function editDeadline(item,prefillKey){
  const {w,s}=item;
  const isA=item.type==='작가마감';
@@ -626,7 +671,7 @@ function confirmMove(){
 function resetShifts(id){
  const w=works.find(x=>x.id===id); if(!w)return;
  if(!confirm(`${w.name}의 밀린 일정을 모두 초기화하고 원래 자동 계산된 일정으로 되돌릴까요?`))return;
- w.shifts=[]; if(w.author) w.author.shifts=[]; save(); render();
+ w.shifts=[]; w.releaseShifts=[]; if(w.author) w.author.shifts=[]; save(); render();
 }
 function toggleRelease(){
  showRelease=!showRelease;
@@ -644,7 +689,7 @@ function renderWorks(){
    ${esc(w.name)}<br><span style="color:#777;font-size:12px">${w.cycle}주+${w.breakWeeks??1}주 휴재</span>
   </label>
   <div class="work-actions">
-   ${((w.shifts&&w.shifts.length)||(w.author?.shifts?.length))?`<button class="mini" onclick="resetShifts(${w.id})" title="밀린 일정 초기화">↺</button>`:''}
+   ${((w.shifts&&w.shifts.length)||(w.releaseShifts&&w.releaseShifts.length)||(w.author?.shifts?.length))?`<button class="mini" onclick="resetShifts(${w.id})" title="밀린 일정 초기화">↺</button>`:''}
    <button class="mini" onclick="openModal(works.find(x=>x.id===${w.id}))" title="설정 수정">⚙</button>
    <button class="mini" onclick="duplicateWork(${w.id})" title="이 설정을 복사하여 새 작품 추가">⧉</button>
    <button class="del" onclick="delWork(${w.id})" title="삭제">×</button>
@@ -734,7 +779,7 @@ function render(){
     e.preventDefault();cell.classList.remove('dragover');
     if(!dragItem)return;
     const item=dragItem; dragItem=null;
-    editDeadline(item,cellKey);
+    if(item.type==='임의') moveEventByDrag(item,cellKey,e); else showDropPick(item,cellKey,e);
   };
   let n=document.createElement('div');n.className='num';
   if(key(d)===key(new Date()))n.className+=' today';
@@ -756,7 +801,7 @@ function render(){
       ev.style.cursor='grab';ev.title='드래그해서 날짜를 옮기거나, 클릭해서 직접 날짜를 입력할 수 있습니다.';
       ev.draggable=true;
       const ck=completed[item.w.id+'_'+item.s.ep]===true;
-      ev.innerHTML=`<div style="cursor:pointer"><input class="done" type="checkbox" ${ck?'checked':''} onclick="event.stopPropagation();toggleDone(${item.w.id},${item.s.ep})"> <b style="${ck?'text-decoration:line-through;opacity:.55':''}">${esc(item.w.name)}</b><br><span class="small">${item.s.ep}화 · 마감${item.overridden?' · 수정됨':''}${(item.w.shifts&&item.w.shifts.some(sh=>sh.ep<=item.s.ep))?' · 일정밀림':''}</span></div>`;
+      ev.innerHTML=`<div style="cursor:pointer"><input class="done" type="checkbox" ${ck?'checked':''} onclick="event.stopPropagation();toggleDone(${item.w.id},${item.s.ep})"> <b style="${ck?'text-decoration:line-through;opacity:.55':''}">${esc(item.w.name)}</b><br><span class="small">${item.s.ep}화 · 마감${item.overridden?' · 수정됨':''}${([...(item.w.shifts||[]),...(item.w.releaseShifts||[])].some(sh=>sh.ep<=item.s.ep))?' · 일정밀림':''}</span></div>`;
       ev.onclick=(e)=>{if(e.target.tagName!=='INPUT') editDeadline(item)};
       ev.ondragstart=(e)=>{dragItem=item; ev.classList.add('dragging'); e.dataTransfer.effectAllowed='move';};
       ev.ondragend=()=>{ev.classList.remove('dragging'); dragItem=null;};
@@ -779,10 +824,12 @@ function render(){
       const ckKey='ev_'+item.ev.id+'_'+item.date, ck=completed[ckKey]===true;
       let ev=document.createElement('div');ev.className='event custom'+(item.w?'':' personal');
       if(item.w){ev.style.background=item.w.color+'40';ev.style.borderLeft=`5px solid ${item.w.color}`;}
-      ev.title='클릭해서 일정 수정';
       const rl=repeatLabel(item.ev.repeat);
       ev.innerHTML=`<div><input class="done" type="checkbox" ${ck?'checked':''} onclick="event.stopPropagation();toggleEvDone('${ckKey}')"> <b style="${ck?'text-decoration:line-through;opacity:.55':''}">${esc(item.ev.title)}</b><br><span class="small">${item.w?esc(item.w.name):'개인 일정'}${rl?' · '+rl:''}</span></div>`;
       ev.onclick=(e)=>{if(e.target.tagName!=='INPUT') openEventModal(item.ev.id,item.date)};
+      ev.draggable=true; ev.title='클릭해서 수정 · 끌어다 놓으면 날짜 이동';
+      ev.ondragstart=(e)=>{dragItem=item; ev.classList.add('dragging'); e.dataTransfer.effectAllowed='move';};
+      ev.ondragend=()=>{ev.classList.remove('dragging'); dragItem=null;};
       cell.appendChild(ev);
     } else if(showRelease && item.type==='휴재'){
       let ev=document.createElement('div');ev.className='event';ev.style.background='#f8f9fa';ev.style.color='#5f6368';
@@ -813,7 +860,7 @@ function exportEvents(w,fromKey,toKey){
   const lastEp=w.episode+c*w.cycle+w.cycle-1;
   if(w.finalEpisode&&lastEp>=w.finalEpisode) break;
   const base=firstReleaseDate(w);
-  base.setDate(base.getDate()+c*(w.cycle+(w.breakWeeks??1))*7+w.cycle*7+shiftDaysFor(w,lastEp));
+  base.setDate(base.getDate()+c*(w.cycle+(w.breakWeeks??1))*7+w.cycle*7+releaseShiftFor(w,lastEp));
   if(base>to) break;
   for(let bw=0;bw<(w.breakWeeks??1);bw++){const d=new Date(base);d.setDate(base.getDate()+bw*7);ev.push(['h',null,key(d)]);}
  }
